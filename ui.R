@@ -4,12 +4,17 @@ library('shinydashboard')
 library('shinycssloaders')
 library('dashboardthemes')
 
+# UI
+# 1) Allow user to selected up to two strategies
+# 2) Create control parameter settings for these two strategies [or just one]
+# 3) Create checkboxes so that the user can see multiple strategies [gray those for which a combination does not exist]
 
 sidebar <- dashboardSidebar(
   width = 350,
   sidebarMenu(
     menuItem('Introduction', tabName = 'introduction', icon = icon('file-alt')),
     menuItem('Exit Strategies', tabName = 'exit', icon = icon('dashboard')),
+    menuItem('Model Details', tabName = 'details', icon = icon('info-circle')),
     menuItem('About', tabName = 'about', icon = icon('address-card'))
   )
 )
@@ -33,7 +38,7 @@ body <- dashboardBody(
             HTML(
             "<p style = 'font-size: 120%; text-align: center;'>This app uses the model described in de Vlas & Coffeng
             (<a href='https://www.medrxiv.org/content/10.1101/2020.03.29.20046011v2' target='_blank'>2020</a>) to explore the
-            effects of various different exit strategies.<p>"
+            effects of different exit strategies.<p>"
             )
           )
         )
@@ -42,6 +47,7 @@ body <- dashboardBody(
     
     tabItem(
       tabName = 'exit',
+    
       fluidRow(
         
         column(
@@ -49,19 +55,32 @@ body <- dashboardBody(
           box(
             collapsible = TRUE,
             title = 'Select an Exit Strategy', width = NULL, solidHeader = TRUE, status = 'primary',
-            selectInput(
+            
+            checkboxGroupInput(
               'exit',
               'Type of Exit Strategy',
+              inline = FALSE,
               choices = c(
                 'Radical Opening' = 'radical-opening',
                 'Phased Opening' = 'phased-opening',
-                'Flattening the Curve' = 'flatten-curve',
-                'Contact Tracing' = 'contact-tracing'
+                'Flattening the Curve' = 'flattening-curve',
+                'Contact Tracing' = 'contact-tracing',
+                'Intermittent Lockdown' = 'intermittent-lockdown'
               )
             )
+            
+            # selectInput(
+            #   'exit',
+            #   'Type of Exit Strategy',
+            #   choices = c(
+            #     'Radical Opening' = 'radical-opening',
+            #     'Phased Opening' = 'phased-opening',
+            #     'Flattening the Curve' = 'flatten-curve',
+            #     'Contact Tracing' = 'contact-tracing'
+            #   )
+            # )
           )
         ),
-        
         
         column(
           width = 8,
@@ -69,22 +88,53 @@ body <- dashboardBody(
             collapsible = FALSE,
             title = textOutput('visualisation_name'),
             width = NULL, solidHeader = TRUE, status = 'primary',
-            uiOutput('exit_visualisation')
+            plotOutput('exit_visualisation') %>% withSpinner(color = '#0dc5c1')
           )
         ),
 
         column(
           width = 4,
-          box(
-            title = 'Parameters',
+          tabBox(
             width = NULL,
-            status = 'warning',
-            collapsible = FALSE, solidHeader = TRUE,
-            uiOutput('exit_parameters'),
-            actionButton('run', 'Run')
+            id = 'tabset', title = '',
+            
+            tabPanel(
+              title = 'Key Parameters',
+              width = NULL,
+              status = 'warning',
+              collapsible = FALSE, solidHeader = TRUE,
+              uiOutput('exit_parameters'),
+              actionButton('run', 'Run')
+            ),
+            
+            tabPanel(
+              title = 'Sensitivity',
+              withMathJax(),
+              
+              width = NULL,
+              status = 'warning',
+              collapsible = FALSE, solidHeader = TRUE,
+              selectInput(
+                'R0', withMathJax('\\( R_0 \\)'),
+                choices = c('2' = 2, '2.5' = 2.5, '3' = 3), selected = 2.5
+              ),
+              selectInput(
+                'infectiousness', 'Average Duration of Infectiousness',
+                choices = c('8 Days' = 8, '10 Days' = 10, '12 Days' = 12), selected = 10
+              ),
+              selectInput(
+                'incubation', 'Average Incubation Time',
+                choices = c('4.5 Days' = 4.5, '5.5 Days' = 5.5, '6.5 Days' = 6.5), selected = 5.5
+              ),
+              actionButton('run', 'Run')
+            )
           )
         )
       )
+    ),
+  
+    tabItem(
+      tabName = 'details'
     ),
     
     tabItem(

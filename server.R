@@ -6,36 +6,13 @@ scen_output <- as.data.table(readRDS(file = 'data/scen_output.rds'))
 scen_description <- as.data.table(readRDS(file = 'data/scen_description.rds'))
 
 
-show_figure <- function(session, path, alt = '') {
-  # Get size of window from the session
-  width <- session$clientData$output_no_intervention_plot_width
-  height <- session$clientData$output_no_intervention_plot_height
-  
-  pixelratio <- session$clientData$pixelratio # what is this?
-  
-  x <- readImage(path)
-  # y <- resize(x, w = width, h = height)
-  y <- resize(x, h = height)
-  y
-  
-  # # Return a list containing the filename
-  # list(
-  #   src = path,
-  #   contentType = 'image/png',
-  #   width = width,
-  #   height = height,
-  #   alt = alt
-  # )
-}
-
-
 shinyServer(function(input, output, session) {
   
   strategies <- list(
     'radical-opening' = list(
       name = 'Radical Opening'
     ),
-    'flatten-curve' = list(
+    'flattening-curve' = list(
       name = 'Flattening the Curve'
     ),
     'phased-opening' = list(
@@ -43,62 +20,88 @@ shinyServer(function(input, output, session) {
     ),
     'contact-tracing' = list(
       name = 'Contact Tracing'
+    ),
+    'intermittent-lockdown' = list(
+      name = 'Intermittent Lockdown'
     )
   )
   
   exit_strategy <- reactiveValues(data = NULL)
-  
-  observeEvent(input$exit, {
-    exit_strategy$data <- input$exit
-    exit_strategy$name <- strategies[[input$exit]][['name']]
-  })
-  
-  output$visualisation_name <- renderText({
-    exit_strategy$name
-  })
-  
-  output$exit_visualisation <- renderUI({
-    res <- NULL
-    name <- exit_strategy$name
-    strategy <- exit_strategy$data
-    
-    if (strategy == 'radical-opening') {
-      res <- plotOutput('radical_opening')
-    }
-    
-    res
-  })
-  
-  output$exit_parameters <- renderUI({
-    res <- tagList()
-    strategy <- exit_strategy$data
-    
-    if (strategy == 'radical-opening') {
-      res <- tagList()
-      
-      res[[1]] <-selectInput(
-        'radical_transmission', 'Transmission',
-        choices = c('25%' = 0.25, '50%' = 0.50, '75%' = 0.75)
-      )
-      
-      res[[2]] <- sliderInput('slider', 'Slider', 0, 1, 1, .01)
-    }
-    
-    res
-  })
+  previous_exit_strategies <- reactiveValues(data = NULL)
   
   
-  output$radical_opening <- renderPlot({
-    p <- plot_scen(
-      x = scen_output[par_set == 1],
-      y = scen_description[par_set == 1],
-      IC_adm_data = IC_adm_data
+  observe({
+    choice <- input$exit
+    choices <- c(
+      'Radical Opening' = 'radical-opening',
+      'Phased Opening' = 'phased-opening',
+      'Flattening the Curve' = 'flattening-curve',
+      'Contact Tracing' = 'contact-tracing',
+      'Intermittent Lockdown' = 'intermittent-lockdown'
     )
     
-    p
+    nr_exit <- length(choice)
+    exit_strategy$data <- input$exit
+    
+    # User wants to click more than 2 boxes --- do not allow!
+    if (!is.null(choice)) {
+      
+      if (nr_exit > 2) {
+        updateCheckboxGroupInput(
+          session, 'exit', 'Type of Exit Strategy',
+          choices = choices, selected = previous_exit_strategies$names
+        )
+      } else {
+        previous_exit_strategies$names <- exit_strategy$data
+      }
+    }
+    
+    # User only choose one exit strategy
+    if (nr_exit == 1) {
+      exit_strategy$names <- strategies[[choice]][['name']]
+      exit_strategy$title <- strategies[[choice]][['name']]
+      
+    } else if (nr_exit == 2) {
+      
+      exit_strategy$names <- c(
+        strategies[[choice[1]]][['name']],
+        strategies[[choice[2]]][['name']]
+      )
+      
+      exit_strategy$title <- paste0(
+        exit_strategy$names[1], ' vs. ', exit_strategy$names[2]
+      )
+      
+    } else {
+      exit_strategy$title <- ''
+    }
   })
   
-  output$flatten_curve <- renderPlot({
-    hist(runif(100))
+  # Give the exit strategy box a name
+  output$visualisation_name <- renderText({
+    exit_strategy$title
+  })
+  
+  # Create the exit parameter UI
+  output$exit_parameters <- renderUI({
+    exit <- exit_strategy$data
+    
+    if (!is.null(exit)) {
+      create_exit_parameters(exit, exit_strategy$names)
+    }
+  })
+  
+  visualize <- eventReactive(input$run, {
+    strategies <- exit_strategy$data
+    
+    if (!is.null(strategies)) {
+      visualize_exit_strategy(
+        strategies, input, scen_output, scen_description, IC_adm_data
+      )
+    }
+  })
+  
+  output$exit_visualisation <- renderPlot({
+    visualize()
   })
 })
