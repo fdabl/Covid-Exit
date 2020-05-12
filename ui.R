@@ -82,7 +82,7 @@ body <- dashboardBody(
             collapsible = FALSE,
             title = textOutput('visualisation_name'),
             width = NULL, solidHeader = TRUE, status = 'primary',
-            plotOutput('exit_visualisation', height = '600px') %>% withSpinner(color = '#0dc5c1')
+            withSpinner(plotOutput('exit_visualisation', height = '600px'), color = '#0dc5c1')
           )
         ),
 

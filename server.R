@@ -2,11 +2,6 @@ library('shiny')
 library('shinyjs')
 source('helpers.R')
 
-# Load in the relevant data
-IC_adm_data <- fread('data/IC_NL.csv')
-scen_output <- as.data.table(readRDS(file = 'data/scen_output.rds'))
-scen_description <- as.data.table(readRDS(file = 'data/scen_description.rds'))
-
 
 shinyServer(function(input, output, session) {
   
