@@ -71,7 +71,13 @@ create_exit_parameters <- function(strategies, names) {
           choices = c(
             '90%' = '90%',
             '80%' = '80%',
-            '70%' = '70%'
+            '70%' = '70%',
+            '60%' = '60%',
+            '50%' = '50%',
+            '40%' = '40%',
+            '30%' = '30%',
+            '20%' = '20%',
+            '10%' = '10%'
           ), selected = '90%'
         )
         
@@ -104,6 +110,7 @@ create_exit_parameters <- function(strategies, names) {
       
       res[[i]][[2]] <- p('Intermittent Lockdown does not have any parameters.')
       
+      # TODO: Update this with new parameters once Luc has implemented them
       # res[[i]][[2]] <- checkboxGroupInput(
       #   'exit_light_switch',
       #   'Type of Light Switch',
@@ -213,62 +220,6 @@ visualize_exit_strategy <- function(
     IC_adm_data = IC_adm_data
   )
 }
-
-
-# # Prep scenario labels ---------------------------------------------------------
-# scen_description[scen_name == "instant_lift",
-#                  scen_label := "Instant lift of control"]
-# 
-# scen_description[scen_name == "instant_lift_contact_tracing",
-#                  scen_label := paste0("TTI (",
-#                                       "prob_E = ", trace_prob_E, "%, ",
-#                                       "delay_I = ", trace_delay_I, " days, ",
-#                                       "effect = ", trace_contact_reduction,
-#                                       "%)")]
-# 
-# scen_description[scen_name == "extend_lockdown_contact_tracing",
-#                  scen_label := paste0("Extend + TTI (",
-#                                       "prob_E = ", trace_prob_E, "%, ",
-#                                       "delay_I = ", trace_delay_I, " days, ",
-#                                       "effect = ", trace_contact_reduction,
-#                                       "%)")]
-# 
-# scen_description[scen_name == "flattening",
-#                  scen_label := c("FtC: 3 years, transmission at 30%-55%-90%",
-#                                  "FtC: 3 years, transmission at 35%-55%-90%",
-#                                  "FtC: 3 years, transmission at 40%-55%-90%",
-#                                  "FtC: 2.5 years, transmission at 35%-55%-90%",
-#                                  "FtC: 2 years, transmission at 35%-55%")]
-# 
-# scen_description[scen_name == "light_switch",
-#                  scen_label := "Intermittent lockdown"]
-# 
-# scen_description[scen_name == "phased_lift_standard",
-#                  scen_label := "Phased lift of control"]
-# 
-# scen_description[scen_name == "phased_lift_efficient",
-#                  scen_label := "Phased lift of control (efficient)"]
-# 
-# scen_description[scen_name == "phased_lift_optimistic",
-#                  scen_label := "Phased lift of control (optimistic)"]
-# 
-# # Corrections / additions ----
-# scen_description[scen_name %in% c("instant_lift_contact_tracing"),
-#                  lift_control_t := 0]
-# 
-# scen_description[scen_name %in% c("extend_lockdown_contact_tracing"),
-#                  lift_control_t := 100]
-# 
-# # Example visualisation --------------------------------------------------------
-# plot_scen(scen_output[par_set == 1])
-# 
-# index <- scen_description[scen_name == "instant_lift_contact_tracing" &
-#                             trace_contact_reduction == 90 &
-#                             trace_delay_I == 3 &
-#                             trace_prob_E < 50,
-#                           par_set]
-# 
-# plot_scen(scen_output[par_set %in% index])
 
 
 

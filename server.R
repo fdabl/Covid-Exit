@@ -8,7 +8,6 @@ scen_output <- as.data.table(readRDS(file = 'data/scen_output.rds'))
 scen_description <- as.data.table(readRDS(file = 'data/scen_description.rds'))
 
 
-
 shinyServer(function(input, output, session) {
   
   strategies <- list(

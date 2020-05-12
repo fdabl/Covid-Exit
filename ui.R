@@ -5,10 +5,6 @@ library('shinydashboard')
 library('shinycssloaders')
 library('dashboardthemes')
 
-# UI
-# 1) Allow user to selected up to two strategies
-# 2) Create control parameter settings for these two strategies [or just one]
-# 3) Create checkboxes so that the user can see multiple strategies [gray those for which a combination does not exist]
 
 sidebar <- dashboardSidebar(
   width = 350,
@@ -41,7 +37,13 @@ body <- dashboardBody(
             HTML(
             "<p style = 'font-size: 120%; text-align: center;'>This app uses the model described in de Vlas & Coffeng
             (<a href='https://www.medrxiv.org/content/10.1101/2020.03.29.20046011v2' target='_blank'>2020</a>) to explore the
-            effects of different exit strategies.<p>"
+            effects of different exit strategies.<p>
+            
+            <h2 style = 'color: red; text-align: center;'><b>Warning</b></h3>
+            <p style = 'font-size: 120%; text-align: center;'>
+            This app is under development. Please do not consider the information presented
+            here as having been vetted or approved by the authors or developers.</p>
+            "
             )
           )
         )
