@@ -1,4 +1,5 @@
 library('shiny')
+library('shinyjs')
 library('shinythemes')
 library('shinydashboard')
 library('shinycssloaders')
@@ -20,6 +21,8 @@ sidebar <- dashboardSidebar(
 )
 
 body <- dashboardBody(
+  shinyjs::useShinyjs(),
+  
   shinyDashboardThemes(
     theme = 'grey_light'
   ),
@@ -68,32 +71,21 @@ body <- dashboardBody(
                 'Intermittent Lockdown' = 'intermittent-lockdown'
               )
             )
-            
-            # selectInput(
-            #   'exit',
-            #   'Type of Exit Strategy',
-            #   choices = c(
-            #     'Radical Opening' = 'radical-opening',
-            #     'Phased Opening' = 'phased-opening',
-            #     'Flattening the Curve' = 'flatten-curve',
-            #     'Contact Tracing' = 'contact-tracing'
-            #   )
-            # )
           )
         ),
         
         column(
-          width = 8,
+          width = 9,
           box(
             collapsible = FALSE,
             title = textOutput('visualisation_name'),
             width = NULL, solidHeader = TRUE, status = 'primary',
-            plotOutput('exit_visualisation') %>% withSpinner(color = '#0dc5c1')
+            plotOutput('exit_visualisation', height = '600px') %>% withSpinner(color = '#0dc5c1')
           )
         ),
 
         column(
-          width = 4,
+          width = 3,
           tabBox(
             width = NULL,
             id = 'tabset', title = '',

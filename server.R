@@ -1,9 +1,12 @@
 library('shiny')
+library('shinyjs')
 source('helpers.R')
 
+# Load in the relevant data
 IC_adm_data <- fread('data/IC_NL.csv')
 scen_output <- as.data.table(readRDS(file = 'data/scen_output.rds'))
 scen_description <- as.data.table(readRDS(file = 'data/scen_description.rds'))
+
 
 
 shinyServer(function(input, output, session) {
@@ -27,8 +30,6 @@ shinyServer(function(input, output, session) {
   )
   
   exit_strategy <- reactiveValues(data = NULL)
-  previous_exit_strategies <- reactiveValues(data = NULL)
-  
   
   observe({
     choice <- input$exit
@@ -43,25 +44,23 @@ shinyServer(function(input, output, session) {
     nr_exit <- length(choice)
     exit_strategy$data <- input$exit
     
-    # User wants to click more than 2 boxes --- do not allow!
-    if (!is.null(choice)) {
-      
-      if (nr_exit > 2) {
-        updateCheckboxGroupInput(
-          session, 'exit', 'Type of Exit Strategy',
-          choices = choices, selected = previous_exit_strategies$names
-        )
-      } else {
-        previous_exit_strategies$names <- exit_strategy$data
-      }
-    }
-    
-    # User only choose one exit strategy
+    # User only chose one exit strategy. Need to unblock all elements
     if (nr_exit == 1) {
+      
+      shinyjs::enable(selector = '#exit')
       exit_strategy$names <- strategies[[choice]][['name']]
       exit_strategy$title <- strategies[[choice]][['name']]
       
+    # User chose two exit strategies. Need to block all other elements
     } else if (nr_exit == 2) {
+      
+      # Block other elements from being clicked on
+      others <- choices[!sapply(choices, function(ch) ch %in% choice)]
+      blocked_elements <- paste0("#exit input[value='", others, "']")
+      shinyjs::disable(selector = blocked_elements)
+      
+      # TODO: Change colour of other elements
+      # shinyjs::runjs("document.getElementsByName('#exit').style.color = 'grey'")
       
       exit_strategy$names <- c(
         strategies[[choice[1]]][['name']],
@@ -86,15 +85,16 @@ shinyServer(function(input, output, session) {
   output$exit_parameters <- renderUI({
     exit <- exit_strategy$data
     
-    if (!is.null(exit)) {
+    if (!is.null(exit) && length(exit) <= 2) {
       create_exit_parameters(exit, exit_strategy$names)
     }
   })
   
+  # Visualize the exit strategies
   visualize <- eventReactive(input$run, {
     strategies <- exit_strategy$data
     
-    if (!is.null(strategies)) {
+    if (!is.null(strategies) && length(strategies) <= 2) {
       visualize_exit_strategy(
         strategies, input, scen_output, scen_description, IC_adm_data
       )

@@ -4,7 +4,11 @@ library('gridExtra')
 library('data.table')
 
 
-
+#' Creates the Key Parameter UI Interface
+#' 
+#' @param strategies Character vector indicating which strategy interface to show
+#' @param names Character vector giving the actual names of the strategies
+#' @returns A tagList which renders the UI
 create_exit_parameters <- function(strategies, names) {
   
   res <- tagList()
@@ -24,8 +28,8 @@ create_exit_parameters <- function(strategies, names) {
       
       res[[i]][[2]] <- checkboxGroupInput(
         'exit_phased_opening',
-        'Type of Phased Opening',
-        inline = TRUE,
+        'Type of Phased Opening:',
+        inline = FALSE,
         choices = c(
           'Regular' = 'scenario-1',
           'Efficient' = 'scenario-2',
@@ -37,14 +41,14 @@ create_exit_parameters <- function(strategies, names) {
       
       res[[i]][[2]] <- checkboxGroupInput(
         'exit_flattening_curve',
-        'Type of Flattening the Curve',
+        'Type of Flattening the Curve:',
         inline = FALSE,
         choices = c(
           'Transmission Reduction to 30%' = 'scenario-1',
           'Transmission Reduction to 35%' = 'scenario-2',
           'Transmission Reduction to 40%' = 'scenario-3',
-          'Transmission Reduction to 35% & Release Last Intervention Early' = 'scenario-4',
-          'Transmission Reduction to 35% & Skip Last Intervention' = 'scenario-5'
+          'Transmission Reduction to 35% + Release Last Intervention Early' = 'scenario-4',
+          'Transmission Reduction to 35% + Skip Last Intervention' = 'scenario-5'
         ), selected = 'scenario-1'
       )
       
@@ -52,48 +56,48 @@ create_exit_parameters <- function(strategies, names) {
       
       res[[i]][[2]] <- checkboxGroupInput(
         'contact_tracing_lockdown',
-        'How many days addditional lockdown: ',
-        inline = TRUE,
+        'Additional Lockdown for:',
+        inline = FALSE,
         choices = c(
-          '0 Days' = 'days-0',
-          '100 Days' = 'days-100'
-        ), selected = 'days-0'
+          '0 Days' = '0 Days',
+          '100 Days' = '100 Days'
+        ), selected = '0 Days'
       )
         
         res[[i]][[3]] <- checkboxGroupInput(
           'contact_tracing_trace_probability',
-          'Probability of Successfully Tracing Contacts: ',
-          inline = TRUE,
+          '% of Contacts Successfully Traced:',
+          inline = FALSE,
           choices = c(
-            '90%' = 'tracing-probability-90',
-            '80%' = 'tracing-probability-80',
-            '70%' = 'tracing-probability-70'
-          ), selected = 'tracing-probability-90'
+            '90%' = '90%',
+            '80%' = '80%',
+            '70%' = '70%'
+          ), selected = '90%'
         )
         
         res[[i]][[4]] <- checkboxGroupInput(
           'contact_tracing_contact_reduction',
-          '% Reduction in Contacts: ',
-          inline = TRUE,
+          '% Reduction in Contacts:',
+          inline = FALSE,
           choices = c(
-            '90%' = 'contact-reduction-90',
-            '80%' = 'contact-reduction-80',
-            '70%' = 'contact-reduction-70',
-            '60%' = 'contact-reduction-60',
-            '50%' = 'contact-reduction-50'
-          ), selected = 'contact-reduction-90'
+            '90%' = '90%',
+            '80%' = '80%',
+            '70%' = '70%',
+            '60%' = '60%',
+            '50%' = '50%'
+          ), selected = '90%'
         )
         
         res[[i]][[5]] <- checkboxGroupInput(
           'contact_tracing_tracing_delay',
-          'Delay in Contact Tracing (Days): ',
-          inline = TRUE,
+          'Delay in Contact Tracing:',
+          inline = FALSE,
           choices = c(
-            '2 Days' = 'contact-delay-2',
-            '3 Days' = 'contact-delay-3',
-            '4 Days' = 'contact-delay-4',
-            '5 Days' = 'contact-delay-5'
-          ), selected = 'contact-delay-2'
+            '2 Days' = '2 days',
+            '3 Days' = '3 days',
+            '4 Days' = '4 days',
+            '5 Days' = '5 days'
+          ), selected = '2 days'
         )
         
     } else if (name == 'Intermittent Lockdown') {
@@ -117,12 +121,19 @@ create_exit_parameters <- function(strategies, names) {
 }
 
 
+#' Visualizes the Exit Strategies
+#' 
+#' @param strategies Character vector indicating which strategy interface to show
+#' @param input List giving the user inputs
+#' @param scen_output data.table giving the scenario / exit-strategy data base
+#' @param scen_description data.table giving the scenario / exit-strategy descriptions
+#' @param IC_adm_data data.table giving the IC data
+#' @returns ggplot object
 visualize_exit_strategy <- function(
   strategies, input, scen_output, scen_description, IC_adm_data
   ) {
   
   map <- list(
-    
     'radical-opening' = 'Instant lift of control',
     'intermittent-lockdown' = 'Intermittent lockdown',
     
@@ -141,21 +152,57 @@ visualize_exit_strategy <- function(
     )
   )
   
+  
   sel <- c()
   
   for (strategy in strategies) {
     s <- paste0('exit_', gsub('-', '_', strategy))
     
-    inp <- input[[s]]
-    
-    if (!is.null(inp)) {
-      for (j in inp) {
-        sel <- c(sel, map[[strategy]][[j]])
+    # Contact Tracing requires additional logic
+    if (strategy == 'contact-tracing') {
+      
+      additional_lockdown <- input$contact_tracing_lockdown
+      trace_prob_E <- input$contact_tracing_trace_probability
+      trace_delay_I <- input$contact_tracing_tracing_delay
+      trace_contact_reduction <- input$contact_tracing_contact_reduction
+      
+      combinations <- expand.grid(
+        'lockdown' = additional_lockdown,
+        'prob' = trace_prob_E,
+        'delay' = trace_delay_I,
+        'reduction' = trace_contact_reduction
+      )
+      
+      for (i in seq(nrow(combinations))) {
+        comb <- combinations[i, ]
+        
+        if (comb$lockdown == '0 Days') {
+          s <- paste0('TTI (', 'prob_E = ', comb$prob, ', ',
+                               'delay_I = ', comb$delay, ', ',
+                               'effect = ', comb$reduction, ')')
+        } else {
+          s <- paste0('TTI + Extend (', 'prob_E = ', comb$prob, '%, ',
+                                        'delay_I = ', comb$delay, ', ',
+                                        'effect = ', comb$reduction, ')')
+        }
+        
+        sel <- c(sel, s)
       }
+      
+      
     } else {
       
-      # Radical opening does not have inputs (Intermittent Lockdown not for now as well)
-      sel <- c(sel, map[[strategy]])
+      inp <- input[[s]]
+      
+      if (!is.null(inp)) {
+        for (j in inp) {
+          sel <- c(sel, map[[strategy]][[j]])
+        }
+      } else {
+        
+        # Radical Opening & Intermittent Lockdown do not have parameters as of yet
+        sel <- c(sel, map[[strategy]])
+      }
     }
   }
   
@@ -225,7 +272,7 @@ visualize_exit_strategy <- function(
 
 
 
-# Function definitions ---------------------------------------------------------
+#' Plotting function provided by Luc Coffeng
 plot_scen <- function(sim_output,
                       sim_descript = copy(scen_description),
                       IC_adm_data = NULL,
