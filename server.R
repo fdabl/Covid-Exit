@@ -3,6 +3,7 @@ library('shinyjs')
 source('helpers.R')
 
 
+# Mean of Monte carlo would be nice!
 shinyServer(function(input, output, session) {
   
   strategies <- list(
