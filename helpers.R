@@ -183,15 +183,18 @@ visualize_exit_strategy <- function(
         'reduction' = trace_contact_reduction
       )
       
+      print(combinations)
+      
       for (i in seq(nrow(combinations))) {
         comb <- combinations[i, ]
+        print(comb)
         
         if (comb$lockdown == '0 Days') {
           s <- paste0('TTI (', 'prob_E = ', comb$prob, ', ',
                                'delay_I = ', comb$delay, ', ',
                                'effect = ', comb$reduction, ')')
         } else {
-          s <- paste0('TTI + Extend (', 'prob_E = ', comb$prob, '%, ',
+          s <- paste0('Extend + TTI (', 'prob_E = ', comb$prob, ', ',
                                         'delay_I = ', comb$delay, ', ',
                                         'effect = ', comb$reduction, ')')
         }
@@ -216,7 +219,9 @@ visualize_exit_strategy <- function(
     }
   }
   
+  print(sel)
   pars <- scen_description[scen_label %in% sel]$par_set
+  print(pars)
   
   plot_scen(
     scen_output[par_set %in% pars],
