@@ -30,11 +30,12 @@ create_exit_parameters <- function(strategies, names) {
     } else if (name == 'Phased Opening') {
       
       res[[i]][[2]] <- checkboxGroupInput(
-        'exit_phased_opening',
+        'phased-opening',
+        # 'exit_phased_opening',
         'Type of Phased Opening:',
         inline = FALSE,
         choices = c(
-          'Regular' = 'scenario-1',
+          'Standard' = 'scenario-1',
           'Efficient' = 'scenario-2',
           'Optimistic' = 'scenario-3'
         ), selected = 'scenario-1'
@@ -43,7 +44,8 @@ create_exit_parameters <- function(strategies, names) {
     } else if (name == 'Flattening the Curve') {
       
       res[[i]][[2]] <- checkboxGroupInput(
-        'exit_flattening_curve',
+        'flattening-curve',
+        # 'exit_flattening_curve',
         'Type of Flattening the Curve:',
         inline = FALSE,
         choices = c(
@@ -111,18 +113,17 @@ create_exit_parameters <- function(strategies, names) {
         
     } else if (name == 'Intermittent Lockdown') {
       
-      res[[i]][[2]] <- p('Intermittent Lockdown does not have any parameters.')
-      
-      # TODO: Update this with new parameters once Luc has implemented them
-      # res[[i]][[2]] <- checkboxGroupInput(
-      #   'exit_light_switch',
-      #   'Type of Light Switch',
-      #   inline = TRUE,
-      #   choices = c(
-      #     'Hardcoded' = 'scenario-1',
-      #     'Control 25%, no control 100%' = 'scenario-2'
-      #   ), selected = 'scenario-1'
-      # )
+      res[[i]][[2]] <- checkboxGroupInput(
+        'intermittent-lockdown',
+        # 'exit_intermittent_lockdown',
+        'Type of Intermittent Lockdown',
+        inline = FALSE,
+        choices = c(
+          'Perfectly executed' = 'scenario-1',
+          'Lockdown too light' = 'scenario-2',
+          'Release too long' = 'scenario-3'
+        ), selected = 'scenario-1'
+      )
       
     }
   }
@@ -140,12 +141,11 @@ create_exit_parameters <- function(strategies, names) {
 #' @param IC_adm_data data.table giving the IC data
 #' @returns ggplot object
 visualize_exit_strategy <- function(
-  strategies, input, scen_output, scen_description, IC_adm_data
+  strategies, input, scen_output, scen_description, IC_adm_data, ...
   ) {
   
   map <- list(
     'radical-opening' = 'Instant lift of control',
-    'intermittent-lockdown' = 'Intermittent lockdown',
     
     'flattening-curve' = list(
       'scenario-1' = 'FtC: 3 years, transmission at 30%-55%-90%',
@@ -156,9 +156,15 @@ visualize_exit_strategy <- function(
     ),
     
     'phased-opening' = list(
-      'scenario-1' = 'Phased lift of control',
+      'scenario-1' = 'Phased lift of control (standard)',
       'scenario-2' = 'Phased lift of control (efficient)',
       'scenario-3' = 'Phased lift of control (optimistic)'
+    ),
+    
+    'intermittent-lockdown' = list(
+      'scenario-1' = 'Intermittent lockdown (perfectly executed)',
+      'scenario-2' = 'Intermittent lockdown (lockdown too light)',
+      'scenario-3' = 'Intermittent lockdown (release too long)'
     )
   )
   
@@ -166,7 +172,8 @@ visualize_exit_strategy <- function(
   sel <- c()
   
   for (strategy in strategies) {
-    s <- paste0('exit_', gsub('-', '_', strategy))
+    # s <- paste0('exit_', gsub('-', '_', strategy))
+    s <- strategy
     
     # Contact Tracing requires additional logic
     if (strategy == 'contact-tracing') {
@@ -183,11 +190,9 @@ visualize_exit_strategy <- function(
         'reduction' = trace_contact_reduction
       )
       
-      print(combinations)
-      
       for (i in seq(nrow(combinations))) {
         comb <- combinations[i, ]
-        print(comb)
+        # print(comb)
         
         if (comb$lockdown == '0 Days') {
           s <- paste0('TTI (', 'prob_E = ', comb$prob, ', ',
@@ -205,7 +210,9 @@ visualize_exit_strategy <- function(
       
     } else {
       
+      print(s)
       inp <- input[[s]]
+      print(inp)
       
       if (!is.null(inp)) {
         for (j in inp) {
@@ -213,7 +220,7 @@ visualize_exit_strategy <- function(
         }
       } else {
         
-        # Radical Opening & Intermittent Lockdown do not have parameters as of yet
+        # Radical Opening does not have parameters
         sel <- c(sel, map[[strategy]])
       }
     }
@@ -225,10 +232,10 @@ visualize_exit_strategy <- function(
   
   plot_scen(
     scen_output[par_set %in% pars],
-    IC_adm_data = IC_adm_data
+    IC_adm_data = IC_adm_data,
+    ...
   )
 }
-
 
 
 #' Plotting function provided by Luc Coffeng
@@ -237,22 +244,29 @@ plot_scen <- function(sim_output,
                       IC_adm_data = NULL,
                       ncol = 1,
                       max_I = 6e3,
-                      max_IC = 1900 / 17.4,
+                      max_IC_prev = 1900 / 17.4,
                       target_R = 60,
                       plot_IC_data = TRUE,
                       x_breaks = NULL,
                       y_breaks_I = NULL,
-                      y_breaks_IC = NULL,
+                      y_breaks_IC_inc = NULL,
+                      y_breaks_IC_prev = NULL,
                       y_breaks_R = NULL,
                       x_range = NULL,
                       y_range_I = NULL,
-                      y_range_IC = NULL,
+                      y_range_IC_inc = NULL,
+                      y_range_IC_prev = NULL,
                       y_range_R = NULL,
                       n_ticks_y = 5,
                       n_ticks_x = 8,
                       intervention_linetype = 3,
                       theme_choice = theme_classic(),
-                      scale_margin = 6) {
+                      scale_margin = 6,
+                      legend = "inside") {  # or "outside"
+  
+  if (!any(legend %in% c("inside", "outside"))) {
+    "legend must be 'inside' or 'outside'"
+  }
   
   sim_output <- copy(sim_output)
   index <- sim_output[, unique(par_set)]
@@ -268,7 +282,8 @@ plot_scen <- function(sim_output,
   }
   
   if (is.null(x_breaks)) {
-    x_breaks <- sim_output[, pretty(time, n = n_ticks_x)]  
+    x_breaks <- sim_output[, pretty(c(time, intervention_times,x_range),
+                                    n = n_ticks_x)]  
   } else {
     x_breaks <- x_breaks * -1e3:1e3
   }
@@ -289,17 +304,28 @@ plot_scen <- function(sim_output,
     y_breaks_I <- y_breaks_I * 0:1e3
   }
   
-  if (is.null(y_breaks_IC)) {
-    if (is.null(y_range_IC)) {
-      y_breaks_IC <- sim_output[, pretty(c(0,
-                                           IC_prev,
-                                           max_IC), n = n_ticks_y)]
-      y_range_IC <- range(y_breaks_IC)
+  if (is.null(y_breaks_IC_inc)) {
+    if (is.null(y_range_IC_inc)) {
+      y_breaks_IC_inc <- sim_output[, pretty(c(0, IC_inc), n = n_ticks_y)]
+      y_range_IC_inc <- range(y_breaks_IC_inc)
     } else {
-      y_breaks_IC <- pretty(y_range_IC, n = n_ticks_y)
+      y_breaks_IC_inc <- pretty(y_range_IC_inc, n = n_ticks_y)
     }
   } else {
-    y_breaks_IC <- y_breaks_IC * 0:1e3
+    y_breaks_IC_inc <- y_breaks_IC_inc * 0:1e3
+  }
+  
+  if (is.null(y_breaks_IC_prev)) {
+    if (is.null(y_range_IC_prev)) {
+      y_breaks_IC_prev <- sim_output[, pretty(c(0,
+                                                IC_prev,
+                                                max_IC_prev), n = n_ticks_y)]
+      y_range_IC_prev <- range(y_breaks_IC_prev)
+    } else {
+      y_breaks_IC_prev <- pretty(y_range_IC_prev, n = n_ticks_y)
+    }
+  } else {
+    y_breaks_IC_prev <- y_breaks_IC_prev * 0:1e3
   }
   
   if (is.null(y_breaks_R)) {
@@ -320,32 +346,42 @@ plot_scen <- function(sim_output,
   # Prep data ----
   N_pop <- sim_output[par_set == min(par_set)][time == min(time)][seed == min(seed), sum(S + E + I + R)]
   sim_output <- sim_output[, lapply(.SD, function(x) x / N_pop * 1e6),
-                           .SDcols = c("S", "E", "I", "R", "inc", "IC_prev"),
+                           .SDcols = c("S", "E", "I", "R", "inc", "IC_prev", "IC_inc"),
                            by = .(seed, time, par_set)]
   sim_output[sim_descript,
              on = "par_set",
-             scen_label := scen_label]
+             scen_label := scen_legend]
   
   # Construct panel A ----
-  panel_A <-
-    if (sim_output[, length(unique(par_set)) > 1]) {
-      ggplot(data = sim_output,
-             mapping = aes(x = time, y = I,
-                           group = interaction(seed, scen_label),
-                           col = factor(scen_label))) +
-        scale_color_discrete(name = NULL,
-                             guide = guide_legend(override.aes = list(size = .75))) +
-        theme_choice +
+  if (sim_output[, length(unique(par_set)) > 1]) {
+    panel_A <- ggplot(data = sim_output,
+                      mapping = aes(x = time, y = I,
+                                    group = interaction(seed, scen_label),
+                                    col = factor(scen_label))) +
+      scale_color_discrete(name = NULL,
+                           guide = guide_legend(override.aes = list(size = .75))) +
+      theme_choice
+    
+    if (legend == "inside") {
+      panel_A <- panel_A +
         theme(legend.title = element_blank(),
               legend.position = c(1, 1),
               legend.justification = c(1, 1),
               legend.background = element_rect(colour = "transparent",
                                                fill = scales::alpha('white', 0.25)))
-    } else {
-      ggplot(data = sim_output,
-             mapping = aes(x = time, y = I, group = seed)) +
-        theme_choice
     }
+    if (legend == "outside") {
+      panel_A <- panel_A +
+        theme(legend.title = element_blank(),
+              legend.position = c(0, 1),
+              legend.justification = c(0, 1))  
+    }
+    
+  } else {
+    panel_A <-ggplot(data = sim_output,
+                     mapping = aes(x = time, y = I, group = seed)) +
+      theme_choice
+  }
   
   if (any(!is.na(intervention_times))) {
     panel_A <- panel_A +
@@ -367,13 +403,13 @@ plot_scen <- function(sim_output,
   panel_B <-
     if (sim_output[, length(unique(par_set)) > 1]) {
       ggplot(data = sim_output,
-             mapping = aes(x = time, y = IC_prev,
+             mapping = aes(x = time, y = IC_inc,
                            group = interaction(seed, scen_label),
                            col = factor(scen_label))) +
         scale_color_discrete(guide = FALSE)
     } else {
       ggplot(data = sim_output,
-             mapping = aes(x = time, y = IC_prev, group = seed))
+             mapping = aes(x = time, y = IC_inc, group = seed))
     }
   panel_B <- panel_B + theme_choice
   
@@ -384,17 +420,55 @@ plot_scen <- function(sim_output,
   }
   
   panel_B <- panel_B +
-    geom_hline(yintercept = max_IC, linetype = 2) +
     geom_line(size = .2) +
     x_axis_definition + 
     scale_y_continuous(name = NULL,
-                       breaks = y_breaks_IC,
+                       breaks = y_breaks_IC_inc,
                        labels = scales::comma) + 
-    coord_cartesian(x = x_range, y = y_range_IC) +
-    labs(title = "Number of cases in IC per million")
+    coord_cartesian(x = x_range, y = y_range_IC_inc) +
+    labs(title = "Number of new cases in IC per million per day")
   
   if (plot_IC_data) {
     panel_B <- panel_B +
+      geom_point(data = IC_adm_data,
+                 mapping = aes(x = Day_since_lockdown + intervention_times[1],
+                               y = NICE_new / 17.4,
+                               group = NULL),
+                 size = 0.8, col = "red", alpha = .75, shape = 1)
+  }
+  
+  # Construct panel C ----
+  panel_C <-
+    if (sim_output[, length(unique(par_set)) > 1]) {
+      ggplot(data = sim_output,
+             mapping = aes(x = time, y = IC_prev,
+                           group = interaction(seed, scen_label),
+                           col = factor(scen_label))) +
+        scale_color_discrete(guide = FALSE)
+    } else {
+      ggplot(data = sim_output,
+             mapping = aes(x = time, y = IC_prev, group = seed))
+    }
+  panel_C <- panel_C + theme_choice
+  
+  if (any(!is.na(intervention_times))) {
+    panel_C <- panel_C +
+      geom_vline(xintercept = intervention_times,
+                 col = "darkgrey", linetype = intervention_linetype)
+  }
+  
+  panel_C <- panel_C +
+    geom_hline(yintercept = max_IC_prev, linetype = 2) +
+    geom_line(size = .2) +
+    x_axis_definition + 
+    scale_y_continuous(name = NULL,
+                       breaks = y_breaks_IC_prev,
+                       labels = scales::comma) + 
+    coord_cartesian(x = x_range, y = y_range_IC_prev) +
+    labs(title = "Number of cases present in IC per million")
+  
+  if (plot_IC_data) {
+    panel_C <- panel_C +
       geom_point(data = IC_adm_data,
                  mapping = aes(x = Day_since_lockdown + intervention_times[1],
                                y = NICE / 17.4,
@@ -402,8 +476,8 @@ plot_scen <- function(sim_output,
                  size = 0.8, col = "red", alpha = .75, shape = 1)
   }
   
-  # Construct panel C ----
-  panel_C <-
+  # Construct panel D: Recovered ----
+  panel_D <-
     if (sim_output[, length(unique(par_set)) > 1]) {
       ggplot(data = sim_output,
              mapping = aes(x = time,
@@ -417,15 +491,15 @@ plot_scen <- function(sim_output,
                            y = 100 * R / (S + E + I + R),
                            group = seed))  
     }
-  panel_C <- panel_C + theme_choice
+  panel_D <- panel_D + theme_choice
   
   if (any(!is.na(intervention_times))) {
-    panel_C <- panel_C +
+    panel_D <- panel_D +
       geom_vline(xintercept = intervention_times,
                  col = "darkgrey", linetype = intervention_linetype)
   }
   
-  panel_C <- panel_C +
+  panel_D <- panel_D +
     geom_hline(yintercept = target_R, linetype = 2) +
     geom_line(size = .2) +
     x_axis_definition + 
@@ -434,29 +508,58 @@ plot_scen <- function(sim_output,
     coord_cartesian(x = x_range, y = y_range_R) +
     labs(title = "Percentage recovered (%)")
   
+  # Manage legend
+  get_legend <- function(a.gplot) {
+    tmp <- ggplot_gtable(ggplot_build(a.gplot))
+    leg <- which(sapply(tmp$grobs, function(x) x$name) == "guide-box")
+    legend <- tmp$grobs[[leg]]
+    return(legend)
+  }
+  
+  if (sim_output[, length(unique(par_set)) > 1] &
+      legend == "outside") {
+    mylegend <- get_legend(panel_A)
+    panel_A <- panel_A + theme(legend.position = "none")
+  }
+  
   # Construct compound plot ----
   if (ncol == 1) {
     margin_A <- theme(plot.margin = unit(rep(6, 4) + scale_margin * c(1, rep(0, 3)), "pt"))
     margin_B <- theme(plot.margin = unit(rep(6, 4) + scale_margin * c(.5, 0, .5, 0), "pt"))
-    margin_C <- theme(plot.margin = unit(rep(6, 4) + scale_margin * c(0, 0, 1, 0), "pt"))
+    margin_C <- theme(plot.margin = unit(rep(6, 4) + scale_margin * c(.5, 0, .5, 0), "pt"))
+    margin_D <- theme(plot.margin = unit(rep(6, 4) + scale_margin * c(0, 0, 1, 0), "pt"))
   } else {
     margin_A <- theme(plot.margin = unit(rep(6, 4) + scale_margin * rep(1, 4), "pt"))
     margin_B <- theme(plot.margin = unit(rep(6, 4) + scale_margin * rep(1, 4), "pt"))
     margin_C <- theme(plot.margin = unit(rep(6, 4) + scale_margin * rep(1, 4), "pt"))
+    margin_D <- theme(plot.margin = unit(rep(6, 4) + scale_margin * rep(1, 4), "pt"))
   }
   
   gA <- ggplotGrob(panel_A + margin_A)
   gB <- ggplotGrob(panel_B + margin_B)
   gC <- ggplotGrob(panel_C + margin_C)
+  gD <- ggplotGrob(panel_D + margin_D)
   
   maxWidth = grid::unit.pmax(gA$widths[2:5],
                              gB$widths[2:5],
-                             gC$widths[2:5])
+                             gC$widths[2:5],
+                             gD$widths[2:5])
   gA$widths[2:5] <- as.list(maxWidth)
   gB$widths[2:5] <- as.list(maxWidth)
   gC$widths[2:5] <- as.list(maxWidth)
-  grid.arrange(gA, gB, gC,
-               ncol = ncol,
-               bottom = "Time since start of strategy (days)")
+  gD$widths[2:5] <- as.list(maxWidth)
+  
+  if (sim_output[, length(unique(par_set)) > 1] &
+      legend == "outside") {
+    grid.arrange(arrangeGrob(gA, gB, gC, gD,
+                             ncol = ncol,
+                             bottom = "Time since start of strategy (days)"),
+                 mylegend,
+                 ncol = 2) 
+  } else {
+    grid.arrange(gA, gB, gC, gD,
+                 ncol = ncol,
+                 bottom = "Time since start of strategy (days)")
+  }
   
 }

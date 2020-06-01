@@ -71,6 +71,38 @@ shinyServer(function(input, output, session) {
     }
   })
   
+  # Explanation plots
+  output$explanation_radical_opening <- renderPlot({
+    visualize_exit_strategy('radical-opening', NULL, scen_output, scen_description, IC_adm_data)
+  })
+  
+  output$explanation_flattening_curve <- renderPlot({
+    inp <- list('flattening-curve' = c('scenario-1', 'scenario-2', 'scenario-3'))
+    visualize_exit_strategy('flattening-curve', inp, scen_output, scen_description, IC_adm_data, legend = 'inside')
+  })
+  
+  output$explanation_phased_opening <- renderPlot({
+    inp <- list('phased-opening' = c('scenario-1', 'scenario-3'))
+    visualize_exit_strategy('phased-opening', inp, scen_output, scen_description, IC_adm_data, legend = 'inside')
+  })
+  
+  output$explanation_contact_tracing <- renderPlot({
+    inp <- list(
+      'contact_tracing_contact_reduction' = c('60%', '70%'),
+      'contact_tracing_lockdown' = '0 days',
+      'contact_tracing_trace_probability' = '60%',
+      'contact_tracing_tracing_delay' = '2 days'
+      
+    )
+    visualize_exit_strategy('contact-tracing', inp, scen_output, scen_description, IC_adm_data, legend = 'inside')
+  })
+  
+  output$explanation_intermittent_lockdown <- renderPlot({
+    inp <-list('intermittent-lockdown' = c('scenario-1', 'scenario-2', 'scenario-3'))
+    visualize_exit_strategy('intermittent-lockdown', inp, scen_output, scen_description, IC_adm_data, legend = 'inside')
+  })
+  
+  
   # Give the exit strategy box a name
   output$visualisation_name <- renderText({
     exit_strategy$title
