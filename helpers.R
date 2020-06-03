@@ -27,12 +27,12 @@ create_exit_parameters <- function(strategies, names) {
       
       res[[i]][[2]] <- p('Radical Opening does not have any parameters.')
       
-    } else if (name == 'Phased Opening') {
+    } else if (name == 'Phased Lift of Control') {
       
       res[[i]][[2]] <- checkboxGroupInput(
         'phased-opening',
         # 'exit_phased_opening',
-        'Type of Phased Opening:',
+        'Type of Phased Lift of Control:',
         inline = FALSE,
         choices = c(
           'Standard' = 'scenario-1',
@@ -238,7 +238,7 @@ visualize_exit_strategy <- function(
 }
 
 
-#' Plotting function provided by Luc Coffeng
+# Function definitions ---------------------------------------------------------
 plot_scen <- function(sim_output,
                       sim_descript = copy(scen_description),
                       IC_adm_data = NULL,
@@ -262,7 +262,8 @@ plot_scen <- function(sim_output,
                       intervention_linetype = 3,
                       theme_choice = theme_classic(),
                       scale_margin = 6,
-                      legend = "inside") {  # or "outside"
+                      legend = "outside",  # or "outside"
+                      legend_ratio = .75) {
   
   if (!any(legend %in% c("inside", "outside"))) {
     "legend must be 'inside' or 'outside'"
@@ -368,12 +369,12 @@ plot_scen <- function(sim_output,
               legend.position = c(1, 1),
               legend.justification = c(1, 1),
               legend.background = element_rect(colour = "transparent",
-                                               fill = scales::alpha('white', 0.25)))
+                                               fill = scales::alpha('white', 0.25)))  
     }
     if (legend == "outside") {
       panel_A <- panel_A +
         theme(legend.title = element_blank(),
-              legend.position = c(0, 1),
+              legend.position = c(0.05, 1),
               legend.justification = c(0, 1))  
     }
     
@@ -516,10 +517,11 @@ plot_scen <- function(sim_output,
     return(legend)
   }
   
-  if (sim_output[, length(unique(par_set)) > 1] &
-      legend == "outside") {
+  if (sim_output[, length(unique(par_set)) > 1] & legend == "outside") {
     mylegend <- get_legend(panel_A)
     panel_A <- panel_A + theme(legend.position = "none")
+  } else {
+    mylegend <- grid::grid.rect(gp = grid::gpar(col = "white"))
   }
   
   # Construct compound plot ----
@@ -549,17 +551,21 @@ plot_scen <- function(sim_output,
   gC$widths[2:5] <- as.list(maxWidth)
   gD$widths[2:5] <- as.list(maxWidth)
   
-  if (sim_output[, length(unique(par_set)) > 1] &
-      legend == "outside") {
-    grid.arrange(arrangeGrob(gA, gB, gC, gD,
-                             ncol = ncol,
-                             bottom = "Time since start of strategy (days)"),
-                 mylegend,
-                 ncol = 2) 
-  } else {
-    grid.arrange(gA, gB, gC, gD,
-                 ncol = ncol,
-                 bottom = "Time since start of strategy (days)")
-  }
+  # if (sim_output[, length(unique(par_set)) > 1] & legend == "outside") {
+  #   grid.arrange(mylegend,
+  #                gA, gB, gC, gD,
+  #                bottom = "Time since start of strategy (days)",
+  #                ncol = 1,
+  #                heights = c(1, rep(4, 4)))
+  # } else {
+  #   grid.arrange(gA, gB, gC, gD,
+  #                ncol = ncol,
+  #                bottom = "Time since start of strategy (days)")
+  # }
   
+  grid.arrange(mylegend,
+               gA, gB, gC, gD,
+               bottom = "Time since start of strategy (days)",
+               ncol = 1,
+               heights = c(legend_ratio, rep(1, 4)))
 }

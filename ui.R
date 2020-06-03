@@ -12,7 +12,7 @@ IMGHEIGHT <- '500px'
 sidebar <- dashboardSidebar(
   width = 350,
   sidebarMenu(
-    menuItem('Introduction', tabName = 'introduction', icon = icon('file-alt')),
+    menuItem('Overview of Exit Strategies', tabName = 'introduction', icon = icon('file-alt')),
     menuItem('Interactive Exploration', tabName = 'exit', icon = icon('dashboard')),
     menuItem('About', tabName = 'about', icon = icon('address-card'))
   )
@@ -33,7 +33,7 @@ body <- dashboardBody(
       fluidPage(
         fluidRow(
           box(
-            width = 12,
+            width = NULL,
             tags$h1(
               'What are the effects of different exit strategies?', align = 'center'
             ),
@@ -61,7 +61,7 @@ body <- dashboardBody(
         
         fluidRow(
           box(
-            width = 12,
+            width = NULL,
             status = 'primary',
             solidHeader = TRUE,
             collapsible = TRUE,
@@ -99,11 +99,11 @@ body <- dashboardBody(
         
         fluidRow(
           box(
-            width = 12,
+            width = NULL,
             status = 'primary',
             solidHeader = TRUE,
             collapsible = TRUE,
-            title = 'Phased Opening',
+            title = 'Phased Lift of Control',
             
             fluidRow(
               column(
@@ -268,29 +268,67 @@ body <- dashboardBody(
               Here, we briefly summarize the main points.</p>
               
               <p>First, the model assumes that the population is composed of a susceptible, exposed (i.e., latent infection),
-              infected, and removed subpopulations. Crucially, it assumes that reinfections do not occur, that is, that immunity
-              lasts for life (or at least until the end of the simulation).</p>
+              infectious, and removed subpopulations as illustrated in the Figure on the right. Crucially, it assumes that
+              reinfections do not occur, that is, that immunity lasts for life, or at least until the end of the simulation.</p>
+              
+              <div style='float: right; padding-left: 25px;'>
+                <img src='SEIR.png' width='600px' height = '275px'>
+              </div>
               
               <p>Second, individuals are assumed to live in clusters (e.g., villages, neighborhoods), which are part of superclusters
-              (e.g. larger urban areas, provinces), which together make up a region or country. The model allows for
-              heterogeneity among contact rates of individuals and a preferential mixing of individuals with similar
-              contact behaviour (i.e., assortative mixing), leading to some clusters having higher or lower average contact rates
-              than the population as a whole on average. Interventions can be simulated at both the level of the whole population and at the
-              level of superclusters, where the geographical boundaries of implementation units for interventions do not necessarily have to
-              match the geographical boundaries of transmission units.</p>
+              (e.g., larger urban areas, provinces), which together make up a region or country. The model allows for heterogeneity
+              among contact rates of individuals and a preferential mixing of individuals with similar contact behaviour
+              (i.e., assortative mixing), leading to some clusters having higher or lower average contact rates than the population as a
+              whole on average. Interventions can be simulated at both the level of the whole population and at the level of superclusters,
+              where the geographical boundaries of implementation units for interventions do not necessarily have to match the geographical
+              boundaries of transmission units.</p>
+              
+              <p>Third, for now the model does not explicitly simulate age or mortality (for the sake of simplicity). Therefore, as
+              long as model-predicted trends in prevalent IC cases remain under the maximum IC capacity (dashed horizontal line in
+              the third panel), the number of deaths can be considered to be proportional to the number of people that experienced
+              infection, which can be deduced from the fraction of the population that has “recovered” from infection (bottom panel).
+              For scenarios in which the number of prevalent cases requiring IC exceeds the IC capacity, mortality should be expected
+              to be far more than proportional to the number of individuals that have experienced infection.</p>
               
               <p>The model allows simulation of two broad categories of interventions: (1) interventions that reduce transmission for all
               individuals and (2) contact tracing leading to isolation of infectious cases and quarantining of exposed contacts.
               These two modalities can be simulated at the same time and can change in intensity and duration throughout the simulation.
               The first modality, overall reductions in transmission, is simulated at the level of implementation units (superclusters),
-              and allows for partial uptake of interventions as well as inter-individual variation in participation / adherence to interventions
-              in case of uptake.</p>
+              and allows for partial uptake of interventions as well as inter-individual variation in participation / adherence to
+              interventions in case of uptake. The second modality, contact tracing, involves two processes. The first is that
+              infectious / symptomatic individuals are at a continuous (user-defined) “risk” of being identified and isolated.
+              The second is the (user-defined) probability that an exposed individual is detected and quarantined before they become
+              infectious. Isolated and quarantined individuals contribute to and are exposed to transmission to a (user-defined) lesser
+              degree than the rest of the population. As the model does not explicitly simulate transmission chains (i.e., who infects whom),
+              exposed and infectious cases are identified in a random and independent fashion.</p>
+              "
+          )
+        )
+      ),
+      
+      fluidRow(
+        box(
+          status = 'primary',
+          solidHeader = TRUE,
+          collapsible = TRUE,
+          title = 'Model Quantification',
+          width = 12,
+          HTML(
+            "
+              <p>Both the latency time and duration of infectiousness are assumed to be 5 days, where first follows a
+              Weibull distribution with shape 20 and the second follows an exponential distribution. Given the assumed duration
+              of infectiousness, we set the transmission rate to 0.48, such that the basic reproduction number R<sub>0</sub> was 2.4. We
+              further assume that 90% of transmission happens at the level of clusters, 5% at the level of superclusters,
+              and the remaining 5% at the population level. These assumptions result in a doubling time of about 5-7 days during the
+              initial phase of epidemic.</p>
               
-              <p>The second modality, contact tracing, involves two processes. The first is that infectious / symptomatic individuals
-              are at a continuous (user-defined) “risk” of being identified and isolated. The second is the (user-defined) probability that an exposed
-              individual is detected and quarantined before they become infectious. Isolated and quarantined individuals contribute to and are exposed
-              to transmission to a (user-defined) lesser degree than the rest of the population. As the model does not explicitly simulate transmission
-              chains (i.e., who infects whom), exposed and infectious cases are identified in a random and independent fashion.</p>
+              <p>The risk of IC admission was estimated based on the number of new and prevalent IC cases in the Netherlands,
+              and the distribution of admission durations (NICE), combined with the reported seroprevalence of ~3% in
+              blood donors (~21 days after lockdown, Sanquin) and 3.6% in the general population
+              (~36 days after lockdown, PIENTER study, RIVM). Based on these data, we estimated that 0.95% of the Dutch
+              population had already been infected at the start of lockdown (12 March), and that IC admission occurs in
+              1 / 182 cases of infection (assuming an average delay of 14 days since onset of infectiousness).
+              The duration of IC admission was estimated at 19.8 days on average (Weibull with shape 1.24).</p>
               "
           )
         )
@@ -313,7 +351,7 @@ body <- dashboardBody(
               inline = FALSE,
               choices = c(
                 'Radical Opening' = 'radical-opening',
-                'Phased Opening' = 'phased-opening',
+                'Phased Lift of Control' = 'phased-opening',
                 'Flattening the Curve' = 'flattening-curve',
                 'Contact Tracing' = 'contact-tracing',
                 'Intermittent Lockdown' = 'intermittent-lockdown'
@@ -351,12 +389,12 @@ body <- dashboardBody(
       fluidPage(
         box(
           width = 1000,
-          h1('About', align = 'center'),
+          h2('About', align = 'center'),
           HTML(
             "<p style = 'text-align: center;'>
             This web interface was developed by <a href='https://twitter.com/fdabl' target='_blank'>Fabian Dablander</a>
-            together with <a href='https://twitter.com/luc_coffeng' target='_blank'>Luc Coffeng</a> as a
-            <a href='http://scienceversuscorona.com/' target='_blank'>Science versus Corona</a> project
+            and <a href='https://twitter.com/luc_coffeng' target='_blank'>Luc Coffeng</a> as a
+            <a href='http://scienceversuscorona.com/' target='_blank'>Science versus Corona</a> project.
             <p>"
             )
         )

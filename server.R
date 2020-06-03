@@ -14,7 +14,7 @@ shinyServer(function(input, output, session) {
       name = 'Flattening the Curve'
     ),
     'phased-opening' = list(
-      name = 'Phased Opening'
+      name = 'Phased Lift of Control'
     ),
     'contact-tracing' = list(
       name = 'Contact Tracing'
@@ -30,7 +30,7 @@ shinyServer(function(input, output, session) {
     choice <- input$exit
     choices <- c(
       'Radical Opening' = 'radical-opening',
-      'Phased Opening' = 'phased-opening',
+      'Phased Lift of Control' = 'phased-opening',
       'Flattening the Curve' = 'flattening-curve',
       'Contact Tracing' = 'contact-tracing',
       'Intermittent Lockdown' = 'intermittent-lockdown'
@@ -73,17 +73,17 @@ shinyServer(function(input, output, session) {
   
   # Explanation plots
   output$explanation_radical_opening <- renderPlot({
-    visualize_exit_strategy('radical-opening', NULL, scen_output, scen_description, IC_adm_data)
+    visualize_exit_strategy('radical-opening', NULL, scen_output, scen_description, IC_adm_data, legend = 'inside')
   })
   
   output$explanation_flattening_curve <- renderPlot({
     inp <- list('flattening-curve' = c('scenario-1', 'scenario-2', 'scenario-3'))
-    visualize_exit_strategy('flattening-curve', inp, scen_output, scen_description, IC_adm_data, legend = 'inside')
+    visualize_exit_strategy('flattening-curve', inp, scen_output, scen_description, IC_adm_data)
   })
   
   output$explanation_phased_opening <- renderPlot({
     inp <- list('phased-opening' = c('scenario-1', 'scenario-3'))
-    visualize_exit_strategy('phased-opening', inp, scen_output, scen_description, IC_adm_data, legend = 'inside')
+    visualize_exit_strategy('phased-opening', inp, scen_output, scen_description, IC_adm_data)
   })
   
   output$explanation_contact_tracing <- renderPlot({
@@ -94,12 +94,12 @@ shinyServer(function(input, output, session) {
       'contact_tracing_tracing_delay' = '2 days'
       
     )
-    visualize_exit_strategy('contact-tracing', inp, scen_output, scen_description, IC_adm_data, legend = 'inside')
+    visualize_exit_strategy('contact-tracing', inp, scen_output, scen_description, IC_adm_data)
   })
   
   output$explanation_intermittent_lockdown <- renderPlot({
     inp <-list('intermittent-lockdown' = c('scenario-1', 'scenario-2', 'scenario-3'))
-    visualize_exit_strategy('intermittent-lockdown', inp, scen_output, scen_description, IC_adm_data, legend = 'inside')
+    visualize_exit_strategy('intermittent-lockdown', inp, scen_output, scen_description, IC_adm_data)
   })
   
   
