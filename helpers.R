@@ -71,7 +71,7 @@ create_exit_parameters <- function(strategies, names) {
         
         res[[i]][[3]] <- checkboxGroupInput(
           'contact_tracing_trace_probability',
-          '% of Contacts Successfully Traced:',
+          '% of Exposed but not yet Infectious Contacts Successfully Traced:',
           inline = FALSE,
           choices = c(
             '90%' = '90%',
@@ -88,7 +88,7 @@ create_exit_parameters <- function(strategies, names) {
         
         res[[i]][[4]] <- checkboxGroupInput(
           'contact_tracing_contact_reduction',
-          '% Reduction in Contacts:',
+          '% Reduction in Contacts for Exposed and Infectious People:',
           inline = FALSE,
           choices = c(
             '90%' = '90%',
@@ -101,7 +101,7 @@ create_exit_parameters <- function(strategies, names) {
         
         res[[i]][[5]] <- checkboxGroupInput(
           'contact_tracing_tracing_delay',
-          'Delay in Contact Tracing:',
+          'Delay in Contact Tracing of Infectious People:',
           inline = FALSE,
           choices = c(
             '2 Days' = '2 days',
@@ -168,71 +168,78 @@ visualize_exit_strategy <- function(
     )
   )
   
-  
+  j <- 1
   sel <- c()
   
   for (strategy in strategies) {
     # s <- paste0('exit_', gsub('-', '_', strategy))
     s <- strategy
     
-    # Contact Tracing requires additional logic
-    if (strategy == 'contact-tracing') {
+    # Radical opening has no parameterization
+    if (strategy == 'radical-opening') {
+      sel <- c(sel, map[[strategy]])
+      
+    } else if (strategy == 'contact-tracing') {
+      # Contact Tracing requires additional logic
       
       additional_lockdown <- input$contact_tracing_lockdown
       trace_prob_E <- input$contact_tracing_trace_probability
       trace_delay_I <- input$contact_tracing_tracing_delay
       trace_contact_reduction <- input$contact_tracing_contact_reduction
       
-      combinations <- expand.grid(
-        'lockdown' = additional_lockdown,
-        'prob' = trace_prob_E,
-        'delay' = trace_delay_I,
-        'reduction' = trace_contact_reduction
-      )
+      all_boxes_checked <- (!is.null(additional_lockdown) && !is.null(trace_prob_E) &&
+                            !is.null(trace_delay_I) && !is.null(trace_contact_reduction))
       
-      for (i in seq(nrow(combinations))) {
-        comb <- combinations[i, ]
-        # print(comb)
+      if (all_boxes_checked) {
+        combinations <- expand.grid(
+          'lockdown' = additional_lockdown,
+          'prob' = trace_prob_E,
+          'delay' = trace_delay_I,
+          'reduction' = trace_contact_reduction
+        )
         
-        if (comb$lockdown == '0 Days') {
-          s <- paste0('TTI (', 'prob_E = ', comb$prob, ', ',
-                               'delay_I = ', comb$delay, ', ',
-                               'effect = ', comb$reduction, ')')
-        } else {
-          s <- paste0('Extend + TTI (', 'prob_E = ', comb$prob, ', ',
-                                        'delay_I = ', comb$delay, ', ',
-                                        'effect = ', comb$reduction, ')')
+        for (i in seq(nrow(combinations))) {
+          comb <- combinations[i, ]
+          # print(comb)
+          
+          if (comb$lockdown == '0 Days') {
+            s <- paste0('TTI (', 'prob_E = ', comb$prob, ', ',
+                                 'delay_I = ', comb$delay, ', ',
+                                 'effect = ', comb$reduction, ')')
+          } else {
+            s <- paste0('Extend + TTI (', 'prob_E = ', comb$prob, ', ',
+                                          'delay_I = ', comb$delay, ', ',
+                                          'effect = ', comb$reduction, ')')
+          }
+          
+          sel <- c(sel, s)
         }
-        
-        sel <- c(sel, s)
       }
-      
       
     } else {
       
-      print(s)
       inp <- input[[s]]
-      print(inp)
-      
+        
       if (!is.null(inp)) {
         for (j in inp) {
           sel <- c(sel, map[[strategy]][[j]])
         }
-      } else {
-        
-        # Radical Opening does not have parameters
-        sel <- c(sel, map[[strategy]])
       }
     }
   }
   
-  print(sel)
+  # Do not show a plot if no parameterization is chosen and
+  # the strategy is not radical opening (which has no different parameterizations)
+  if (length(sel) == 0) {
+    return(NULL)
+  }
+  
   pars <- scen_description[scen_label %in% sel]$par_set
-  print(pars)
   
   plot_scen(
     scen_output[par_set %in% pars],
     IC_adm_data = IC_adm_data,
+    legend_ratio = ifelse(length(sel) == 1, 0, 0.75),
     ...
   )
 }

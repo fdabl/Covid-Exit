@@ -31,9 +31,9 @@ shinyServer(function(input, output, session) {
     choices <- c(
       'Radical Opening' = 'radical-opening',
       'Phased Lift of Control' = 'phased-opening',
+      'Intermittent Lockdown' = 'intermittent-lockdown',
       'Flattening the Curve' = 'flattening-curve',
-      'Contact Tracing' = 'contact-tracing',
-      'Intermittent Lockdown' = 'intermittent-lockdown'
+      'Contact Tracing' = 'contact-tracing'
     )
     
     nr_exit <- length(choice)
@@ -73,7 +73,7 @@ shinyServer(function(input, output, session) {
   
   # Explanation plots
   output$explanation_radical_opening <- renderPlot({
-    visualize_exit_strategy('radical-opening', NULL, scen_output, scen_description, IC_adm_data, legend = 'inside')
+    visualize_exit_strategy('radical-opening', NULL, scen_output, scen_description, IC_adm_data)
   })
   
   output$explanation_flattening_curve <- renderPlot({
@@ -98,7 +98,7 @@ shinyServer(function(input, output, session) {
   })
   
   output$explanation_intermittent_lockdown <- renderPlot({
-    inp <-list('intermittent-lockdown' = c('scenario-1', 'scenario-2', 'scenario-3'))
+    inp <- list('intermittent-lockdown' = c('scenario-1', 'scenario-2', 'scenario-3'))
     visualize_exit_strategy('intermittent-lockdown', inp, scen_output, scen_description, IC_adm_data)
   })
   

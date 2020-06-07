@@ -137,6 +137,46 @@ body <- dashboardBody(
           status = 'primary',
           solidHeader = TRUE,
           collapsible = TRUE,
+          title = 'Intermittent Lockdown',
+          
+          fluidRow(
+            column(
+              width = 7,
+              HTML(
+                "
+                <p>This exit strategy results in lockdowns whenever the number of infections rise to a particular level.
+                When timed correctly, this can in theory avoid the healthcare system becoming overburdened.
+                In practice, however, the resulting trends in IC cases are extremely sensitive to the timing and duration of lockdown.
+                There is high risk of overshooting or undershooting the maximum healthcare capacity, where the latter would lead
+                to herd immunity being reached less quickly.</p>
+                    
+                <p>In the ideal scenario of perfectly timed intermittent lockdown there is even a random chance that the number of cases will
+                exceed the IC capacity. In addition to the ideal scenario, we also present two variants that perform worse due to minor changes
+                in parameters; see the Figure on the right.</p>
+                
+                <p>In the first, the first period of release is too long (30 instead of 25 days), leading to case numbers quickly exceeding health care capacity.
+                This in turn leads to an inefficient and slow increase in herd immunity during the majority of the strategy, and another epidemic that
+                exceeds the IC capacity at the end. In the second variant, the timing of the intermittent lockdown is the same as in the ideal scenario,
+                ]but people adhere suboptimally to the lockdown measures such that transmission is reduced to 30% instead of 25% during each intermittent lockdown.
+                As in the first variant, this leads to case numbers exceeding the IC capacity at the start and end of the strategy.</p>
+                "
+              )
+            ),
+            
+            column(
+              width = 5,
+              withSpinner(plotOutput('explanation_intermittent_lockdown', width = IMGWIDTH, height = IMGHEIGHT), color = '#0dc5c1')
+            )
+          )
+        )
+      ),
+      
+      fluidRow(
+        box(
+          width = 12,
+          status = 'primary',
+          solidHeader = TRUE,
+          collapsible = TRUE,
           title = 'Flattening the Curve',
           
           fluidRow(
@@ -216,46 +256,6 @@ body <- dashboardBody(
       
       fluidRow(
         box(
-          width = 12,
-          status = 'primary',
-          solidHeader = TRUE,
-          collapsible = TRUE,
-          title = 'Intermittent Lockdown',
-          
-          fluidRow(
-            column(
-              width = 7,
-              HTML(
-                "
-                <p>This exit strategy results in lockdowns whenever the number of infections rise to a particular level.
-                When timed correctly, this can in theory avoid the healthcare system becoming overburdened.
-                In practice, however, the resulting trends in IC cases are extremely sensitive to the timing and duration of lockdown.
-                There is high risk of overshooting or undershooting the maximum healthcare capacity, where the latter would lead
-                to herd immunity being reached less quickly.</p>
-                    
-                <p>In the ideal scenario of perfectly timed intermittent lockdown there is even a random chance that the number of cases will
-                exceed the IC capacity. In addition to the ideal scenario, we also present two variants that perform worse due to minor changes
-                in parameters; see the Figure on the right.</p>
-                
-                <p>In the first, the first period of release is too long (30 instead of 25 days), leading to case numbers quickly exceeding health care capacity.
-                This in turn leads to an inefficient and slow increase in herd immunity during the majority of the strategy, and another epidemic that
-                exceeds the IC capacity at the end. In the second variant, the timing of the intermittent lockdown is the same as in the ideal scenario,
-                ]but people adhere suboptimally to the lockdown measures such that transmission is reduced to 30% instead of 25% during each intermittent lockdown.
-                As in the first variant, this leads to case numbers exceeding the IC capacity at the start and end of the strategy.</p>
-                "
-              )
-            ),
-            
-            column(
-              width = 5,
-              withSpinner(plotOutput('explanation_intermittent_lockdown', width = IMGWIDTH, height = IMGHEIGHT), color = '#0dc5c1')
-            )
-          )
-        )
-      ),
-      
-      fluidRow(
-        box(
           status = 'primary',
           solidHeader = TRUE,
           collapsible = TRUE,
@@ -315,7 +315,7 @@ body <- dashboardBody(
           width = 12,
           HTML(
             "
-              <p>Both the latency time and duration of infectiousness are assumed to be 5 days, where first follows a
+              <p>Both the latency time and duration of infectiousness are assumed to be 5 days, where the first follows a
               Weibull distribution with shape 20 and the second follows an exponential distribution. Given the assumed duration
               of infectiousness, we set the transmission rate to 0.48, such that the basic reproduction number R<sub>0</sub> was 2.4. We
               further assume that 90% of transmission happens at the level of clusters, 5% at the level of superclusters,
@@ -344,6 +344,9 @@ body <- dashboardBody(
           box(
             collapsible = TRUE,
             title = 'Select an Exit Strategy', width = NULL, solidHeader = TRUE, status = 'primary',
+            # HTML(
+            #   'Here, you can tweak the core model parameters.'
+            # ),
             
             checkboxGroupInput(
               'exit',
@@ -352,9 +355,9 @@ body <- dashboardBody(
               choices = c(
                 'Radical Opening' = 'radical-opening',
                 'Phased Lift of Control' = 'phased-opening',
+                'Intermittent Lockdown' = 'intermittent-lockdown',
                 'Flattening the Curve' = 'flattening-curve',
-                'Contact Tracing' = 'contact-tracing',
-                'Intermittent Lockdown' = 'intermittent-lockdown'
+                'Contact Tracing' = 'contact-tracing'
               )
             )
           )
