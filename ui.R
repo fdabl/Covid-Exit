@@ -29,6 +29,8 @@ body <- dashboardBody(
     tabItem(
       tags$style(type="text/css", ".explanation_plot{text-align: center;} p{font-size: 120%;}"),
       tags$style(type="text/css", "p{font-size: 130%;}"),
+      tags$style(type="text/css", ".control-label{font-size: 130%;}"),
+      tags$style(type="text/css", ".shiny-options-group{font-size: 120%;}"),
       tabName = 'introduction',
       fluidPage(
         fluidRow(
@@ -72,8 +74,8 @@ body <- dashboardBody(
                 width = 7,
                 HTML(
                   "
-                  <p>The Radical Opening exit strategy, as suggested in the media (e.g., by Klaas Hummel and Grandjean and Ozdemir), involves a sudden lift
-                  of the lockdown to return to business-as-usual. The main benefit of this strategy is that it would swiftly lead to herd immunity,
+                  <p>The Radical Opening exit strategy involves a sudden lift of the lockdown to return to business-as-usual.
+                  The main benefit of this strategy is that it would swiftly lead to herd immunity,
                   after which the epidemic would die off within less than 100 days. Unfortunately, the costs would be vast.</p>
                   
                   <p>The Figure on the right shows that the number of infections would increase dramatically, leading to a substantial overburdening of the
@@ -110,15 +112,26 @@ body <- dashboardBody(
                 width = 7,
                 HTML(
                   "
-                  <p>This exit strategy lifts the lockdown in different areas at different times. It is described in more detail in
-                  De Vlas & Coffeng (2020). Given a certain IC capacity the strategy can be adapted in terms of (a) the number of phases,
-                  (b) the time intervals between phases, and (c) the level of control measures in areas where they are still in force.
-                  Applied to the Netherlands, the idea is to split the country into twenty areas in which the lockdowns are subsequently lifted.</p>
+                  <p>The Phased Lift of Control (PLoC) exit strategy lifts the lockdown in different areas at different times.
+                  It is described in more detail in De Vlas & Coffeng (2020). Given a certain IC capacity the strategy
+                  can be adapted in terms of (a) the number of phases, (b) the time intervals between phases, (c) the level
+                  of control measures in areas where they are still in force, and (d) the degree to which an area where control
+                  is being lifted is isolated from the rest of the country. Applied to the Netherlands, the idea is to split the country
+                  into twenty areas in which the lockdowns are subsequently lifted at regular intervals of 45 days (and one interval of 60 days,
+                  see vertical dotted lines).</p>
                   
                   <p>The Figure on the right shows that this strategy can be designed such that it does not overburden the healthcare system,
                   resulting in vastly fewer deaths than the radical opening strategy. However, the design on the right (20 phases and a maximum
-                  IC capacity of 108 beds per 1 million) requires roughly 750 days  until all measures can be lifted, and achieves a level
-                  of 80% immunity. As you can explore in the interactive part of the app, this strategy comes in three variants.</p>
+                  IC capacity of 108 beds per 1 million) requires roughly 750 days  until all measures can be lifted, and achieves a level of
+                  80% immunity. As you can explore in the interactive part of the app, this strategy comes in three main variants.</p>
+                  
+                  <p>The first variant (“standard”) aims to keep the number of cases in the IC within the limits of the health system. The second variant
+                  (“efficient”) has the same aim, but makes better use of IC capacity towards the end of the strategy by shortening the intervals
+                  between phases. The third variant (“optimistic”) is based on the assumption that either health care capacity will increase over
+                  time, either through reduced risk of IC admission, shorter IC admission, and/or availability of more IC beds. All three variants
+                  are based on the assumption that wherever lifting of control occurs, the area is partially isolated, such that transmission to
+                  and from that area is reduced by 50% period (and returns to 100% when control is lifted in the next area). In addition to the
+                  three main variants, the user can explore a grid of values for parameters (a, b, c, d) listed above.</p>
                   "
                 )
               ),
@@ -344,9 +357,16 @@ body <- dashboardBody(
           box(
             collapsible = TRUE,
             title = 'Select an Exit Strategy', width = NULL, solidHeader = TRUE, status = 'primary',
-            # HTML(
-            #   'Here, you can tweak the core model parameters.'
-            # ),
+            HTML(
+            '
+            <p>
+              As discussed in the Overview of Exit Strategies, all strategies except Radical Opening have
+              parameters that determine how successful they are. Here, you can compare up to two different
+              exit strategies as well as tweak their parameters.
+            </p>
+            '
+            ),
+            br(),
             
             checkboxGroupInput(
               'exit',

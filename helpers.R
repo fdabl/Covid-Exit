@@ -30,23 +30,67 @@ create_exit_parameters <- function(strategies, names) {
     } else if (name == 'Phased Lift of Control') {
       
       res[[i]][[2]] <- checkboxGroupInput(
-        'phased-opening',
-        # 'exit_phased_opening',
-        'Type of Phased Lift of Control:',
+        'phased_opening_phases',
+        'Number of Phases',
+        inline = FALSE,
+        choices = c(
+          '10 Phases' = '10',
+          '20 Phases' = '20'
+        ), selected = '10'
+      )
+      
+      res[[i]][[3]] <- checkboxGroupInput(
+        'phased_opening_interval',
+        'Interval Size in Days',
+        inline = FALSE,
+        choices = c(
+          '30 Days' = '30',
+          '45 Days' = '45',
+          '60 Days' = '60'
+        ), selected = '45'
+      )
+      
+      res[[i]][[4]] <- checkboxGroupInput(
+        'phased_opening_transmission_control',
+        'Transmission Reduction During Control to',
+        inline = FALSE,
+        choices = c(
+          '20%' = '20',
+          '25%' = '25',
+          '30%' = '30'
+        ), selected = '25'
+      )
+      
+      res[[i]][[5]] <- checkboxGroupInput(
+        'phased_opening_transmission_lift',
+        'Interregional Transmission Reduction During Lift to',
+        inline = FALSE,
+        choices = c(
+          '0%' = '0',
+          '50%' = '50',
+          '100% (No Reduction)' = '100',
+          '125% (Increase)' = '125'
+        ), selected = '50'
+      )
+      
+      res[[i]][[6]] <- checkboxGroupInput(
+        'phased_opening_prespecified',
+        'Pre-specified Type of Phased Lift of Control',
         inline = FALSE,
         choices = c(
           'Standard' = 'scenario-1',
           'Efficient' = 'scenario-2',
           'Optimistic' = 'scenario-3'
-        ), selected = 'scenario-1'
+        ), selected = NULL
       )
+      
       
     } else if (name == 'Flattening the Curve') {
       
       res[[i]][[2]] <- checkboxGroupInput(
         'flattening-curve',
         # 'exit_flattening_curve',
-        'Type of Flattening the Curve:',
+        'Type of Flattening the Curve',
         inline = FALSE,
         choices = c(
           'Transmission Reduction to 30%' = 'scenario-1',
@@ -170,6 +214,7 @@ visualize_exit_strategy <- function(
   
   j <- 1
   sel <- c()
+  parset <- c()
   
   for (strategy in strategies) {
     # s <- paste0('exit_', gsub('-', '_', strategy))
@@ -215,31 +260,72 @@ visualize_exit_strategy <- function(
           sel <- c(sel, s)
         }
       }
+    } else if (strategy == 'phased-opening') {
+      # Phased Lift of Control requires additional logic
       
-    } else {
+      phases <- input$phased_opening_phases
+      interval <- input$phased_opening_interval
+      transmission_control <- input$phased_opening_transmission_control
+      transmission_lift <- input$phased_opening_transmission_lift
+      prespecified <- input$phased_opening_prespecified
       
-      inp <- input[[s]]
+      all_boxes_checked <- (!is.null(phases) && !is.null(interval) &&
+                            !is.null(transmission_control) && !is.null(transmission_lift))
+      
+      # Add all prespecified ones
+      if (!is.null(prespecified)) {
+        for (j in prespecified) {
+          sel <- c(sel, map[['phased-opening']][[j]])
+        }
+      }
+      
+      if (all_boxes_checked) {
+        combinations <- expand.grid(
+          'phases' = phases,
+          'interval' = interval,
+          'transmission_control' = transmission_control,
+          'transmission_lift' = transmission_lift
+        )
         
-      if (!is.null(inp)) {
-        for (j in inp) {
-          sel <- c(sel, map[[strategy]][[j]])
+        # Filter Phased Lift of Control according to parset, because scen_label is not unambiguous
+        for (i in seq(nrow(combinations))) {
+          comb <- combinations[i, ]
+          
+          selected <- scen_description[(phases == comb$phases &
+                                        interval == comb$interval &
+                                        effect_control == comb$transmission_control &
+                                        effect_isolation == comb$transmission_lift)]$par_set
+          
+          parset <- c(parset, selected)
+        }
+      }
+      
+      } else {
+        inp <- input[[s]]
+          
+        if (!is.null(inp)) {
+          for (j in inp) {
+            sel <- c(sel, map[[strategy]][[j]])
+          }
         }
       }
     }
-  }
   
   # Do not show a plot if no parameterization is chosen and
   # the strategy is not radical opening (which has no different parameterizations)
-  if (length(sel) == 0) {
+  if (length(sel) == 0 && length(parset) == 0) {
     return(NULL)
   }
   
+  # print(sel)
   pars <- scen_description[scen_label %in% sel]$par_set
+  pars <- c(pars, parset)
+  # print(pars)
   
   plot_scen(
     scen_output[par_set %in% pars],
     IC_adm_data = IC_adm_data,
-    legend_ratio = ifelse(length(sel) == 1, 0, 0.75),
+    legend_ratio = ifelse(length(pars) == 1, 0, 0.75),
     ...
   )
 }
@@ -269,8 +355,8 @@ plot_scen <- function(sim_output,
                       intervention_linetype = 3,
                       theme_choice = theme_classic(),
                       scale_margin = 6,
-                      legend = "outside",  # or "outside"
-                      legend_ratio = .75) {
+                      legend = "outside",  # or "inside"
+                      legend_ratio = .6) {
   
   if (!any(legend %in% c("inside", "outside"))) {
     "legend must be 'inside' or 'outside'"
@@ -302,7 +388,7 @@ plot_scen <- function(sim_output,
   if (is.null(y_breaks_I)) {
     if (is.null(y_range_I)) {
       y_breaks_I <- sim_output[, pretty(c(0,
-                                          I,
+                                          I / (S + E + I + R) * 1e6,
                                           max_I), n = n_ticks_y)]
       y_range_I <- range(y_breaks_I)
     } else {
@@ -314,7 +400,9 @@ plot_scen <- function(sim_output,
   
   if (is.null(y_breaks_IC_inc)) {
     if (is.null(y_range_IC_inc)) {
-      y_breaks_IC_inc <- sim_output[, pretty(c(0, IC_inc), n = n_ticks_y)]
+      y_breaks_IC_inc <- sim_output[, pretty(c(0,
+                                               IC_inc / (S + E + I + R) * 1e6),
+                                             n = n_ticks_y)]
       y_range_IC_inc <- range(y_breaks_IC_inc)
     } else {
       y_breaks_IC_inc <- pretty(y_range_IC_inc, n = n_ticks_y)
@@ -326,7 +414,7 @@ plot_scen <- function(sim_output,
   if (is.null(y_breaks_IC_prev)) {
     if (is.null(y_range_IC_prev)) {
       y_breaks_IC_prev <- sim_output[, pretty(c(0,
-                                                IC_prev,
+                                                IC_prev / (S + E + I + R) * 1e6,
                                                 max_IC_prev), n = n_ticks_y)]
       y_range_IC_prev <- range(y_breaks_IC_prev)
     } else {
@@ -352,7 +440,7 @@ plot_scen <- function(sim_output,
   theme_choice <- theme_choice + theme(axis.title = element_blank())
   
   # Prep data ----
-  N_pop <- sim_output[par_set == min(par_set)][time == min(time)][seed == min(seed), sum(S + E + I + R)]
+  sim_output[, N_pop := S + E + I + R]
   sim_output <- sim_output[, lapply(.SD, function(x) x / N_pop * 1e6),
                            .SDcols = c("S", "E", "I", "R", "inc", "IC_prev", "IC_inc"),
                            by = .(seed, time, par_set)]
@@ -575,4 +663,5 @@ plot_scen <- function(sim_output,
                bottom = "Time since start of strategy (days)",
                ncol = 1,
                heights = c(legend_ratio, rep(1, 4)))
+  
 }

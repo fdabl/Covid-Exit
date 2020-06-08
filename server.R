@@ -82,7 +82,13 @@ shinyServer(function(input, output, session) {
   })
   
   output$explanation_phased_opening <- renderPlot({
-    inp <- list('phased-opening' = c('scenario-1', 'scenario-3'))
+    inp <- list(
+      'phased_opening_phases' = NULL,
+      'phased_opening_interval' = NULL,
+      'phased_opening_transmission_control' = NULL,
+      'phased_opening_transmission_lift' = NULL,
+      'phased_opening_prespecified' = c('scenario-1', 'scenario-2', 'scenario-3')
+    )
     visualize_exit_strategy('phased-opening', inp, scen_output, scen_description, IC_adm_data)
   })
   
@@ -92,8 +98,8 @@ shinyServer(function(input, output, session) {
       'contact_tracing_lockdown' = '0 days',
       'contact_tracing_trace_probability' = '60%',
       'contact_tracing_tracing_delay' = '2 days'
-      
     )
+    
     visualize_exit_strategy('contact-tracing', inp, scen_output, scen_description, IC_adm_data)
   })
   
