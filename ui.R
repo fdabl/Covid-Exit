@@ -369,7 +369,7 @@ body <- dashboardBody(
             <p>
               As discussed in the Overview of Exit Strategies, all strategies except Radical Opening have
               parameters that determine how successful they are. Here, you can compare up to two different
-              exit strategies as well as tweak their parameters. We recommend not comparing more than five variants, as
+              exit strategies as well as tweak their parameters. We recommend not to compare more than five variants, as
               this quickly becomes unwieldy and can lead to disconnections with the server.
             </p>
             '
@@ -425,7 +425,8 @@ body <- dashboardBody(
             "<p style = 'text-align: center;'>
             This web interface was developed by <a href='https://twitter.com/fdabl' target='_blank'>Fabian Dablander</a>
             and <a href='https://twitter.com/luc_coffeng' target='_blank'>Luc Coffeng</a> as a
-            <a href='http://scienceversuscorona.com/' target='_blank'>Science versus Corona</a> project.
+            <a href='http://scienceversuscorona.com/' target='_blank'>Science versus Corona</a> project. Please report bugs
+            <a href='https://github.com/fdabl/Covid-Exit/issues' target='_blank'>here</a>.
             <p>"
             )
         )
