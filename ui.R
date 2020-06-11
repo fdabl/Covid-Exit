@@ -49,10 +49,11 @@ body <- dashboardBody(
               <p>Here, we compare several alternative exit strategies that either aim to keep the number of infections as low as possible (e.g., contact tracing),
               or that aim to develop herd immunity without exceeding health care capacity. Comparisons are done in terms of the number infections,
               new and prevalent IC admissions, and the level of herd immunity. In each graph, the time points at which interventions change are indicated by vertical
-              dotted lines. Horizontal dashed lines indicate the maximum health care capacity (first and second panels) or the target level of herd immunity (fourth panel).
-              Red open circles represent data reported by NICE.</p>
+              dotted lines. Lines before day 0 indicate interventions specific to the Netherlands during the initial lockdown, and lines from day 0 onwards indicate 
+              interventions that are specific to the exit strategies. Horizontal dashed lines indicate the maximum health care capacity (first and second panels) or
+              the target level of herd immunity (fourth panel). Red open circles represent intensive care data specific to the Netherlands reported by NICE.</p>
               
-              <p>This app uses the model described in de Vlas & Coffeng
+              <p>This app uses the model described in De Vlas & Coffeng
               (<a href='https://www.medrxiv.org/content/10.1101/2020.03.29.20046011v2' target='_blank'>2020</a>) to explore the
               effects of different exit strategies. You can find a brief description of the exit strategies below.
               Under the tab <i>Interactive Exploration</i> on the left, you can further explore these exit strategies.</p>
@@ -82,9 +83,9 @@ body <- dashboardBody(
                   healthcare system (red dashed line). Ethically, this is unacceptable.</p>
                   
                   <p>However, this strategy also has economic consequences that are overlooked by its proponents. Things would not go back to normal
-                  immediately. In fact, Pichler et al. (2020) estimate that opening all industries would still lead to a 16%
-                  reduction of GDP compared to pre-lockdown levels for the UK case. A less radical opening strategy would lead to a
-                  roughly 17% reduction; paying with so many lives for so little economic gain is foolhardy.</p>
+                  immediately. In fact, Pichler et al. (<a href='https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3606984' target='_blank'>2020</a>)
+                  estimate that opening all industries would still lead to a 16% reduction of GDP compared to pre-lockdown levels for the UK case.
+                  A less radical opening strategy would lead to a roughly 17% reduction; paying with so many lives for so little economic gain is foolhardy.</p>
                   
                   <p>In contrast to other exit strategies discussed here, the radical opening exit strategy does not have additional parameters.</p>
                   "
@@ -113,7 +114,8 @@ body <- dashboardBody(
                 HTML(
                   "
                   <p>The Phased Lift of Control (PLoC) exit strategy lifts the lockdown in different areas at different times.
-                  It is described in more detail in De Vlas & Coffeng (2020). Given a certain IC capacity the strategy
+                  It is described in more detail in De Vlas & Coffeng
+              (<a href='https://www.medrxiv.org/content/10.1101/2020.03.29.20046011v2' target='_blank'>2020</a>). Given a certain IC capacity the strategy
                   can be adapted in terms of (a) the number of phases, (b) the time intervals between phases, (c) the level
                   of control measures in areas where they are still in force, and (d) the degree to which an area where control
                   is being lifted is isolated from the rest of the country. Applied to the Netherlands, the idea is to split the country
@@ -127,10 +129,11 @@ body <- dashboardBody(
                   
                   <p>The first variant (“standard”) aims to keep the number of cases in the IC within the limits of the health system. The second variant
                   (“efficient”) has the same aim, but makes better use of IC capacity towards the end of the strategy by shortening the intervals
-                  between phases. The third variant (“optimistic”) is based on the assumption that either health care capacity will increase over
+                  between phases (for this strategy, the IC capacity increases so that the horizontal dashed line does not reflect the limit anymore).
+                  The third variant (“optimistic”) is based on the assumption that health care capacity will increase over
                   time, either through reduced risk of IC admission, shorter IC admission, and/or availability of more IC beds. All three variants
                   are based on the assumption that wherever lifting of control occurs, the area is partially isolated, such that transmission to
-                  and from that area is reduced by 50% period (and returns to 100% when control is lifted in the next area). In addition to the
+                  and from that area is reduced by 50% (and returns to 100% when control is lifted in the next area). In addition to the
                   three main variants, the user can explore a grid of values for parameters (a, b, c, d) listed above.</p>
                   "
                 )
@@ -163,15 +166,16 @@ body <- dashboardBody(
                 There is high risk of overshooting or undershooting the maximum healthcare capacity, where the latter would lead
                 to herd immunity being reached less quickly.</p>
                     
-                <p>In the ideal scenario of perfectly timed intermittent lockdown there is even a random chance that the number of cases will
+                <p>In the ideal scenario of perfectly timed intermittent lockdown (green line) there is still a chance that the number of cases will
                 exceed the IC capacity. In addition to the ideal scenario, we also present two variants that perform worse due to minor changes
                 in parameters; see the Figure on the right.</p>
                 
-                <p>In the first, the first period of release is too long (30 instead of 25 days), leading to case numbers quickly exceeding health care capacity.
-                This in turn leads to an inefficient and slow increase in herd immunity during the majority of the strategy, and another epidemic that
-                exceeds the IC capacity at the end. In the second variant, the timing of the intermittent lockdown is the same as in the ideal scenario,
-                ]but people adhere suboptimally to the lockdown measures such that transmission is reduced to 30% instead of 25% during each intermittent lockdown.
-                As in the first variant, this leads to case numbers exceeding the IC capacity at the start and end of the strategy.</p>
+                <p>In the first variant, the first period of release is too long (30 instead of 25 days), leading to case numbers quickly
+                exceeding health care capacity (blue line). This in turn leads to an inefficient and slow increase in herd immunity during
+                the majority of the strategy, and another epidemic that exceeds the IC capacity at the end. In the second variant, the timing
+                of the intermittent lockdown is the same as in the ideal scenario, but people adhere suboptimally to the lockdown measures such
+                that transmission is reduced to 30% instead of 25% during each intermittent lockdown (red line). As in the first variant, this
+                leads to case numbers exceeding the IC capacity at the start and end of the strategy.</p>
                 "
               )
             ),
@@ -203,11 +207,14 @@ body <- dashboardBody(
                   
                 <p>The Figure on the right shows three different scenarios in which transmissions are reduced to 30%, 35%, or
                 40% in the first period. This illustrates the delicate balance required to make this exit strategy work: in the
-                first period after lockdown, interventions would have to be relaxed such that transmission resumes at 35% of its potential level.
-                If interventions are relaxed too quickly too early (e.g., transmission at 40% of its potential), the number of cases will exceed
-                health care capacity. Vice versa, if interventions are not relaxed enough initially (e.g., transmission at 30% of its potential),
+                first period after lockdown, interventions would have to be relaxed such that transmission resumes at 35% of its potential level (green line);
+                this specification is ideal, but the overall exit strategy is not very robust.
+                
+                Specifically, if interventions are relaxed too quickly too early (e.g., transmission at 40% of its potential),
+                the number of cases will exceed health care capacity in the first as well as last period (blue line).
+                Vice versa, if interventions are not relaxed enough initially (e.g., transmission at 30% of its potential),
                 little immunity will be developed in the population, increasing the risk of a major outbreak when the next set of intervention
-                is relaxed.</p>
+                is relaxed (red line).</p>
                 
                 <p>In all cases, however, it takes at least 800 days until all interventions can be safely stopped.
                 The level of achieved herd immunity depends on whether the last period of flattening the curve includes a major outbreak,
@@ -276,7 +283,7 @@ body <- dashboardBody(
           width = 12,
           HTML(
             "
-              <p>The model follows the SEIR structure and is described in de Vlas & Coffeng
+              <p>The model follows the SEIR structure and is described in De Vlas & Coffeng
               (2020, <a href='https://www.medrxiv.org/content/10.1101/2020.03.29.20046011v2.supplementary-material' target='_blank'>Suppl. 1</a>).
               Here, we briefly summarize the main points.</p>
               
@@ -330,7 +337,7 @@ body <- dashboardBody(
             "
               <p>Both the latency time and duration of infectiousness are assumed to be 5 days, where the first follows a
               Weibull distribution with shape 20 and the second follows an exponential distribution. Given the assumed duration
-              of infectiousness, we set the transmission rate to 0.48, such that the basic reproduction number R<sub>0</sub> was 2.4. We
+              of infectiousness, we set the transmission rate to 0.48, such that the basic reproduction number R<sub>0</sub> is 2.4. We
               further assume that 90% of transmission happens at the level of clusters, 5% at the level of superclusters,
               and the remaining 5% at the population level. These assumptions result in a doubling time of about 5-7 days during the
               initial phase of epidemic.</p>
@@ -362,7 +369,8 @@ body <- dashboardBody(
             <p>
               As discussed in the Overview of Exit Strategies, all strategies except Radical Opening have
               parameters that determine how successful they are. Here, you can compare up to two different
-              exit strategies as well as tweak their parameters.
+              exit strategies as well as tweak their parameters. We recommend not comparing more than five variants, as
+              this quickly becomes unwieldy and can lead to disconnections with the server.
             </p>
             '
             ),

@@ -95,7 +95,7 @@ shinyServer(function(input, output, session) {
   output$explanation_contact_tracing <- renderPlot({
     inp <- list(
       'contact_tracing_contact_reduction' = c('60%', '70%'),
-      'contact_tracing_lockdown' = '0 days',
+      'contact_tracing_lockdown' = '0 Days',
       'contact_tracing_trace_probability' = '60%',
       'contact_tracing_tracing_delay' = '2 days'
     )

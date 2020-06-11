@@ -36,7 +36,7 @@ create_exit_parameters <- function(strategies, names) {
         choices = c(
           '10 Phases' = '10',
           '20 Phases' = '20'
-        ), selected = '10'
+        ), selected = '20'
       )
       
       res[[i]][[3]] <- checkboxGroupInput(
@@ -52,7 +52,7 @@ create_exit_parameters <- function(strategies, names) {
       
       res[[i]][[4]] <- checkboxGroupInput(
         'phased_opening_transmission_control',
-        'Transmission Reduction During Control to',
+        'Transmission During Control Reduced to',
         inline = FALSE,
         choices = c(
           '20%' = '20',
@@ -63,7 +63,7 @@ create_exit_parameters <- function(strategies, names) {
       
       res[[i]][[5]] <- checkboxGroupInput(
         'phased_opening_transmission_lift',
-        'Interregional Transmission Reduction During Lift to',
+        'Interregional Transmission During Lift Reduced to',
         inline = FALSE,
         choices = c(
           '0%' = '0',
@@ -93,11 +93,11 @@ create_exit_parameters <- function(strategies, names) {
         'Type of Flattening the Curve',
         inline = FALSE,
         choices = c(
-          'Transmission Reduction to 30%' = 'scenario-1',
-          'Transmission Reduction to 35%' = 'scenario-2',
-          'Transmission Reduction to 40%' = 'scenario-3',
-          'Transmission Reduction to 35% + Release Last Intervention Early' = 'scenario-4',
-          'Transmission Reduction to 35% + Skip Last Intervention' = 'scenario-5'
+          'Transmission Reduced to 30%' = 'scenario-1',
+          'Transmission Reduced to 35%' = 'scenario-2',
+          'Transmission Reduced to 40%' = 'scenario-3',
+          'Transmission Reduced to 35% + Release Last Intervention Early' = 'scenario-4',
+          'Transmission Reduced to 35% + Skip Last Intervention' = 'scenario-5'
         ), selected = 'scenario-1'
       )
       
@@ -325,7 +325,7 @@ visualize_exit_strategy <- function(
   plot_scen(
     scen_output[par_set %in% pars],
     IC_adm_data = IC_adm_data,
-    legend_ratio = ifelse(length(pars) == 1, 0, 0.75),
+    legend_ratio = ifelse(length(pars) == 1, 0, 0.60),
     ...
   )
 }
@@ -356,7 +356,7 @@ plot_scen <- function(sim_output,
                       theme_choice = theme_classic(),
                       scale_margin = 6,
                       legend = "outside",  # or "inside"
-                      legend_ratio = .6) {
+                      legend_ratio = .50) {
   
   if (!any(legend %in% c("inside", "outside"))) {
     "legend must be 'inside' or 'outside'"
