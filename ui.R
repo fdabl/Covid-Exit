@@ -369,8 +369,8 @@ body <- dashboardBody(
             <p>
               As discussed in the Overview of Exit Strategies, all strategies except Radical Opening have
               parameters that determine how successful they are. Here, you can compare up to two different
-              exit strategies as well as tweak their parameters. We recommend not to compare more than five variants, as
-              this quickly becomes unwieldy and can lead to disconnections with the server.
+              exit strategies as well as tweak their parameters. We recommend not to compare more than four variants, as
+              this quickly becomes unwieldy and can lead to disconnections to the server.
             </p>
             '
             ),
