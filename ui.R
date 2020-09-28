@@ -56,7 +56,8 @@ body <- dashboardBody(
               <p>This app uses the model described in De Vlas & Coffeng
               (<a href='https://www.medrxiv.org/content/10.1101/2020.03.29.20046011v2' target='_blank'>2020</a>) to explore the
               effects of different exit strategies. You can find a brief description of the exit strategies below.
-              Under the tab <i>Interactive Exploration</i> on the left, you can further explore these exit strategies.</p>
+              Under the tab <i>Interactive Exploration</i> on the left, you can further explore these exit strategies. For a blog post
+              introducing this app, see <a href='https://scienceversuscorona.com/interactive-exploration-of-covid-19-exit-strategies/'>here</a>.</p>
               "
             )
           )
