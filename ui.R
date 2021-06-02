@@ -42,11 +42,7 @@ body <- dashboardBody(
             tags$br(),
             HTML(
               "
-              <p>Most countries are affected by the Covid-19 pandemic and experience rapidly increasing numbers of cases and deaths.
-              Many have implemented nationwide stringent control to avoid overburdening the health care system.
-              This paralyzes economic and social activities until the availability of a vaccine, which may take years.</p>
-              
-              <p>Here, we compare several alternative exit strategies that either aim to keep the number of infections as low as possible (e.g., contact tracing),
+              <p>Here, we compare several alternative COVID-19 exit strategies that either aim to keep the number of infections as low as possible (e.g., contact tracing),
               or that aim to develop herd immunity without exceeding health care capacity. Comparisons are done in terms of the number infections,
               new and prevalent IC admissions, and the level of herd immunity. In each graph, the time points at which interventions change are indicated by vertical
               dotted lines. Lines before day 0 indicate interventions specific to the Netherlands during the initial lockdown, and lines from day 0 onwards indicate 
@@ -54,7 +50,7 @@ body <- dashboardBody(
               the target level of herd immunity (fourth panel). Red open circles represent intensive care data specific to the Netherlands reported by NICE.</p>
               
               <p>This app uses the model described in De Vlas & Coffeng
-              (<a href='https://www.medrxiv.org/content/10.1101/2020.03.29.20046011v2' target='_blank'>2020</a>) to explore the
+              (<a href='https://www.nature.com/articles/s41598-021-83492-7' target='_blank'>2021</a>) to explore the
               effects of different exit strategies. You can find a brief description of the exit strategies below.
               Under the tab <i>Interactive Exploration</i> on the left, you can further explore these exit strategies. For a blog post
               introducing this app, see <a href='https://scienceversuscorona.com/interactive-exploration-of-covid-19-exit-strategies/'>here</a>.</p>
@@ -116,7 +112,7 @@ body <- dashboardBody(
                   "
                   <p>The Phased Lift of Control (PLoC) exit strategy lifts the lockdown in different areas at different times.
                   It is described in more detail in De Vlas & Coffeng
-              (<a href='https://www.medrxiv.org/content/10.1101/2020.03.29.20046011v2' target='_blank'>2020</a>). Given a certain IC capacity the strategy
+              (<a href='https://www.nature.com/articles/s41598-021-83492-7' target='_blank'>2021</a>). Given a certain IC capacity the strategy
                   can be adapted in terms of (a) the number of phases, (b) the time intervals between phases, (c) the level
                   of control measures in areas where they are still in force, and (d) the degree to which an area where control
                   is being lifted is isolated from the rest of the country. Applied to the Netherlands, the idea is to split the country

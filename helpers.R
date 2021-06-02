@@ -2,6 +2,36 @@ library('ggplot2')
 library('gridExtra')
 library('data.table')
 
+# savefig = function(name) {
+#   pdf(paste0(url, '/', name), width = 5, height = 7)
+# }
+# 
+# savefig('exit-strategies.pdf')
+# par(mfrow = c(1, 4))
+# pdf(paste0(url, '/', 'exit-strategies.pdf'), width = 14, height = 7)
+# visualize_exit_strategy('radical-opening', NULL, scen_output, scen_description, IC_adm_data)
+# inp1 <- list(
+#   'phased_opening_phases' = NULL,
+#   'phased_opening_interval' = NULL,
+#   'phased_opening_transmission_control' = NULL,
+#   'phased_opening_transmission_lift' = NULL,
+#   'phased_opening_prespecified' = c('scenario-1')#, 'scenario-2', 'scenario-3')
+# )
+# visualize_exit_strategy('phased-opening', inp1, scen_output, scen_description, IC_adm_data)
+# 
+# inp2 <- list(
+#   'contact_tracing_contact_reduction' = c('70%'),#, '70%'),
+#   'contact_tracing_lockdown' = '0 Days',
+#   'contact_tracing_trace_probability' = '60%',
+#   'contact_tracing_tracing_delay' = '2 days'
+# )
+# 
+# visualize_exit_strategy('contact-tracing', inp2, scen_output, scen_description, IC_adm_data)
+# inp3 <- list('intermittent-lockdown' = c('scenario-1'))#0 'scenario-2', 'scenario-3'))
+# visualize_exit_strategy('intermittent-lockdown', inp3, scen_output, scen_description, IC_adm_data)
+# dev.off()
+
+
 # Load in the relevant data
 IC_adm_data <- fread('data/IC_NL.csv')
 scen_output <- as.data.table(readRDS(file = 'data/scen_output.rds'))
@@ -602,7 +632,8 @@ plot_scen <- function(sim_output,
     scale_y_continuous(name = NULL,
                        breaks = y_breaks_R) +
     coord_cartesian(x = x_range, y = y_range_R) +
-    labs(title = "Percentage recovered (%)")
+    # labs(title = "Percentage recovered (%)")
+    labs(title = "Percentage of past infections")
   
   # Manage legend
   get_legend <- function(a.gplot) {
